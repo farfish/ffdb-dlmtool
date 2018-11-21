@@ -2,17 +2,19 @@ library(DBI)
 
 source('./ffdbclient.R')
 
-con <- dbConnect(RPostgres::Postgres(), dbname = 'ffdb_db')
-# con <- 'ffdb.farfish.eu' 
+# You can connect either by using...
+# ... a direct DB connection: con <- dbConnect(RPostgres::Postgres(), dbname = 'ffdb_db')
+# ... to a named remote server: con <- 'ffdb.farfish.eu'
+con <- 'ffdb.farfish.eu'
 
+cat("\n\n# List all DLMtool documents in the database\n")
 str(ffdb_list('dlmtool', con))
 
-json_dfs <- ffdb_fetch('dlmtool', 'demo-cobia', instance = con, convert = FALSE)
-json_df <- json_dfs$cal
+cat("\n\n# Get a list of data.frames for any database object\n")
 doc <- ffdb_fetch('dlmtool', 'demo-cobia', instance = con, convert = TRUE)
-str(doc$cal)
+str(names(doc))
+str(doc$metadata)
 
+cat("\n\n# Fetch and return a DLMtool Data object, which we can then use\n")
 d <- ffdb_to_dlmtool('demo-cobia', instance = con)
-str(d@CAA[1,,])
-summary(d, wait=FALSE, plots=c('PD'))
-
+d@CAA[1,,]

@@ -7,6 +7,7 @@ library(DBI)
 
 
 # List all templates for a given template name
+# example: ffdb_list('dlmtool')
 ffdb_list <- function (template_name, instance = 'ffdb.farfish.eu') {
     if (class(instance) == "PqConnection") {
         # instance is a database connection, fetch directly
@@ -33,7 +34,8 @@ ffdb_list <- function (template_name, instance = 'ffdb.farfish.eu') {
 }
 
 
-# Fetch an FFDB document, convert it into a series of data frames
+# Fetch an FFDB document, convert it into a list of data frames
+# example: ffdb_fetch('dlmtool', 'demo-cobia')
 ffdb_fetch <- function (template_name, document_name, convert = TRUE, instance = 'ffdb.farfish.eu') {
     if (class(instance) == "PqConnection") {
         # instance is a database connection, fetch directly
@@ -66,7 +68,20 @@ ffdb_fetch <- function (template_name, document_name, convert = TRUE, instance =
 }
 
 
-# Convert an FFDB document into proper data.frame's
+# Fetch a document and convert directly to a dlmtool Data object
+# example: ffdb_to_dlmtool('demo-cobia')
+ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
+    doc <- ffdb_fetch('dlmtool', document_name, instance = instance)
+
+    f <- tempfile(fileext = ".csv")
+    ffdbdoc_to_dlmtool_csv(doc, output = f)
+    d <- DLMtool::XL2Data(f)
+    unlink(f)
+    return(d)
+}
+
+
+# (internal use only) Convert a raw JSON FFDB document into proper data.frame's
 json_df_to_ffdbdoc <- function (json_df) {
     to_numeric_or_char <- function (l) {
         withCallingHandlers((function (m) {
@@ -86,7 +101,7 @@ json_df_to_ffdbdoc <- function (json_df) {
 }
 
 
-# Fetch an FFDB "dlmtool" document, and convert it into a DLMtool Data object
+# (internal use only) Given (doc) from ffdb_fetch(), write a DLMtool-compatible csv to the (output) file handle
 ffdbdoc_to_dlmtool_csv <- function (doc, output = stdout()) {
     null_to_na <- function (x) { ifelse(is.null(x), NA, ifelse(identical(x, "NA"), NA, x)) }
 
@@ -158,16 +173,4 @@ ffdbdoc_to_dlmtool_csv <- function (doc, output = stdout()) {
     write_line('Reference OFL type', as.numeric(NA))
     write_line('MPrec', as.numeric(NA))
     write_line('LHYear', as.numeric(null_to_na(rownames(doc$catch)[[length(rownames(doc$catch))]])))
-}
-
-
-# Fetch a document and convert directly to a dlmtool Data object
-ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
-    doc <- ffdb_fetch('dlmtool', document_name, instance = instance)
-    
-    f <- tempfile(fileext = ".csv")
-    ffdbdoc_to_dlmtool_csv(doc, output = f)
-    d <- DLMtool::XL2Data(f)
-    unlink(f)
-    return(d)
 }
