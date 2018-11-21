@@ -18,6 +18,16 @@ Symlink this directory into the shiny server root, for example:
 
     ln -rs . /srv/shiny-server/ffdb-dlmtool
 
+## Authors
+
+* [Jamie Lentin](https://github.com/lentinj) - jamie.lentin@shuttlethread.com
+* [Margarita Rincón Hidalgo](https://github.com/mmrinconh) - margarita.rincon@csic.es
+* Javier Ruiz - javier.ruiz@csic.es
+
+## License
+
+This project is GPL-3.0 licensed - see the LICENSE file for details
+
 ## Acknowledgements
 
 This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement no. 727891.
