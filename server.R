@@ -12,6 +12,8 @@ source('ffdbclient.R')
 # Cache DLMtool data objects as we create them
 ffdb_to_dlmtool <- memoise(ffdb_to_dlmtool)
 
+dlmtool_methods <- read.csv('dlmtool-methods.csv')
+
 # Define server logic required to draw a histogram ----
 server <- function(input, output, session) {
 
@@ -102,7 +104,8 @@ server <- function(input, output, session) {
         return()
     }
     d <- ffdb_to_dlmtool(input$document_name, instance = conn)
-    data.frame(Code=Can(d))
+    out <- merge(data.frame(Code = Can(d)), dlmtool_methods, by = "Code", all.x = TRUE)
+    out[with(out, order(Direction, Code)), colnames(dlmtool_methods)]
   })
 
   output$cantTable <- renderTable({
@@ -112,7 +115,8 @@ server <- function(input, output, session) {
     d <- ffdb_to_dlmtool(input$document_name, instance = conn)
     out <- as.data.frame(Cant(d))
     colnames(out) <- c("Code", "Reason")
-    return(out)
+    out <- merge(out, dlmtool_methods, by = "Code", all.x = TRUE)
+    out[with(out, order(Direction, Code)), c('Direction', 'Code', 'Name', 'Type', 'Reason')]
   })
 
   output$mpBoxPlot <- renderPlot({
@@ -122,6 +126,16 @@ server <- function(input, output, session) {
     d <- ffdb_to_dlmtool(input$document_name, instance = conn)
     d_tac <- runMP(d, reps=1000)
     boxplot(d_tac)
+  })
+
+  output$mpTable <- renderTable({
+    if (nchar(input$document_name) == 0) {
+        return()
+    }
+    d <- ffdb_to_dlmtool(input$document_name, instance = conn)
+    # Find all possible output methods
+    out <- merge(data.frame(Code = Can(d)), dlmtool_methods, by = "Code")
+    out[which(out$Direction == 'output'), colnames(out) != 'Direction']
   })
 }
 

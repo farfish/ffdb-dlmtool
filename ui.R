@@ -40,13 +40,10 @@ ui <- fluidPage(
                       h2("Enough data to produce"),
                       tableOutput("canTable"),
                       h2("Cannot produce"),
-                      tableOutput("cantTable"),
-                      h2("Glossary"),
-                      includeHTML("www/DLMtool_methods_codes.html")),
+                      tableOutput("cantTable")),
                   tabPanel("TAC Plot",
                       plotOutput("mpBoxPlot"),
-                      h2("Glossary"),
-                      includeHTML("www/DLMtool_methods_codes.html"))
+                      tableOutput("mpTable"))
                   )
     )
   )
