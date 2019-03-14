@@ -30,12 +30,16 @@ server <- function(input, output, session) {
   updateSelectInput(session, "document_name", choices = ffdb_list('dlmtool', instance = conn), selected = "demo-cobia")
   poolReturn(conn)
 
-  output$catchPlot <- renderPlot({
-    if (nchar(input$document_name) == 0) {
-        return()
+  dlm_doc <- reactive({
+    if (nchar(input$document_name) > 0) {
+        return(ffdb_to_dlmtool(input$document_name, instance = conn))
+    } else {
+        return(ffdb_to_dlmtool('demo-cobia', instance = conn))
     }
-    d <- ffdb_to_dlmtool(input$document_name, instance = conn)
+  })
 
+  output$catchPlot <- renderPlot({
+    d <- dlm_doc()
     catch <- data.frame(year=as.character(d@Year), catch=d@Cat[1,], ind=d@Ind[1,])
 
     theme_set(theme_bw())
@@ -55,11 +59,7 @@ server <- function(input, output, session) {
   })
 
   output$caaPlot <- renderPlot({
-    if (nchar(input$document_name) == 0) {
-        return()
-    }
-    d <- ffdb_to_dlmtool(input$document_name, instance = conn)
-
+    d <- dlm_doc()
     caa <- d@CAA[1,,]
     dimnames(caa) <- list(
         year=tail(d@Year, dim(d@CAA)[2]),
@@ -70,11 +70,7 @@ server <- function(input, output, session) {
   })
 
   output$calPlot <- renderPlot({
-    if (nchar(input$document_name) == 0) {
-        return()
-    }
-    d <- ffdb_to_dlmtool(input$document_name, instance = conn)
-      
+    d <- dlm_doc()
     cal <- d@CAL[1,,]
     dimnames(cal)<-list(
         year=tail(d@Year, dim(d@CAL)[2]),
@@ -91,11 +87,7 @@ server <- function(input, output, session) {
   })
 
   output$parameterDistributionsPlot <- renderPlot({
-    if (nchar(input$document_name) == 0) {
-        return()
-    }
-    d <- ffdb_to_dlmtool(input$document_name, instance = conn)
-
+    d <- dlm_doc()
     summary(d, wait=FALSE, plots=c('PD'))
   })
 
@@ -104,25 +96,20 @@ server <- function(input, output, session) {
           paste(input$document_name, ".csv", sep="")
       },
       content = function(file) {
+          d <- dlm_doc()
           doc <- ffdb_fetch('dlmtool', input$document_name, instance = conn)
           ffdbdoc_to_dlmtool_csv(doc, output = file)
       }
   )
 
   output$canTable <- renderTable({
-    if (nchar(input$document_name) == 0) {
-        return()
-    }
-    d <- ffdb_to_dlmtool(input$document_name, instance = conn)
+    d <- dlm_doc()
     out <- merge(data.frame(Code = Can(d)), dlmtool_methods, by = "Code", all.x = TRUE)
     out[with(out, order(Direction, Code)), colnames(dlmtool_methods)]
   })
 
   output$cantTable <- renderTable({
-    if (nchar(input$document_name) == 0) {
-        return()
-    }
-    d <- ffdb_to_dlmtool(input$document_name, instance = conn)
+    d <- dlm_doc()
     out <- as.data.frame(Cant(d))
     colnames(out) <- c("Code", "Reason")
     out <- merge(out, dlmtool_methods, by = "Code", all.x = TRUE)
@@ -130,19 +117,13 @@ server <- function(input, output, session) {
   })
 
   output$mpBoxPlot <- renderPlot({
-    if (nchar(input$document_name) == 0) {
-        return()
-    }
-    d <- ffdb_to_dlmtool(input$document_name, instance = conn)
+    d <- dlm_doc()
     d_tac <- runMP(d, reps=1000)
     boxplot(d_tac)
   })
 
   output$mpTable <- renderTable({
-    if (nchar(input$document_name) == 0) {
-        return()
-    }
-    d <- ffdb_to_dlmtool(input$document_name, instance = conn)
+    d <- dlm_doc()
     # Find all possible output methods
     out <- merge(data.frame(Code = Can(d)), dlmtool_methods, by = "Code")
     out[which(out$Direction == 'output'), colnames(out) != 'Direction']
