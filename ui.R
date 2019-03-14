@@ -31,13 +31,17 @@ ui <- fluidPage(
 
       tabsetPanel(type = "tabs",
                   tabPanel("Catch / Abundance Index Plot",
-                      plotOutput("catchPlot", height=600)),
+                      plotOutput("catchPlot", height=600),
+                      downloadButton("catchPlotDownload", label = "Download plot")),
                   tabPanel("CAA",
-                      plotOutput("caaPlot", height=600)),
+                      plotOutput("caaPlot", height=600),
+                      downloadButton("caaPlotDownload", label = "Download plot")),
                   tabPanel("CAL",
-                      plotOutput("calPlot", height=600)),
+                      plotOutput("calPlot", height=600),
+                      downloadButton("calPlotDownload", label = "Download plot")),
                   tabPanel("Parameter Distributions",
-                      plotOutput("parameterDistributionsPlot", height=600)),
+                      plotOutput("parameterDistributionsPlot", height=600),
+                      downloadButton("parameterDistributionsPlotDownload", label = "Download plot")),
                   tabPanel("Diagnostics",
                       h2("Enough data to produce"),
                       tableOutput("canTable"),
@@ -45,6 +49,7 @@ ui <- fluidPage(
                       tableOutput("cantTable")),
                   tabPanel("TAC Plot",
                       plotOutput("mpBoxPlot"),
+                      downloadButton("mpBoxPlotDownload", label = "Download plot"),
                       tableOutput("mpTable"))
                   )
     )
