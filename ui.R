@@ -21,7 +21,9 @@ ui <- fluidPage(
       selectInput(
           "document_name",
           "Document name",
-          list())
+          list()),
+
+      downloadButton("download_csv", "Download DLMtool CSV")
     ),
 
     # Main panel for displaying outputs ----

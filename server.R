@@ -99,6 +99,16 @@ server <- function(input, output, session) {
     summary(d, wait=FALSE, plots=c('PD'))
   })
 
+  output$download_csv <- downloadHandler(
+      filename = function() {
+          paste(input$document_name, ".csv", sep="")
+      },
+      content = function(file) {
+          doc <- ffdb_fetch('dlmtool', input$document_name, instance = conn)
+          ffdbdoc_to_dlmtool_csv(doc, output = file)
+      }
+  )
+
   output$canTable <- renderTable({
     if (nchar(input$document_name) == 0) {
         return()
