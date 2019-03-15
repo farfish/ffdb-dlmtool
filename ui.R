@@ -23,6 +23,9 @@ ui <- fluidPage(
           "Document name",
           list()),
 
+      a("Upload/edit data in FFDB", href="/upload"),
+      br(),
+      br(),
       downloadButton("download_csv", "Download DLMtool CSV")
     ),
 
