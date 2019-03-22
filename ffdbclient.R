@@ -199,7 +199,7 @@ ffdbdoc_to_dlmtool_csv <- function (doc, output = stdout()) {
         write_line(ifelse(i == 1, 'Catch', 'Abundance index'), as.numeric(doc$catch[,i]))
     }
     write_line('Duration t', length(rownames(doc$catch)))
-    write_line('Average catch over time t', mean(doc$catch$catch))
+    write_line('Average catch over time t', doc$constants[1, "avg_catch_over_time"])
     write_line('Depletion over time t', doc$constants[1, "depletion_over_time"])
     write_line('M', doc$constants[1, "M"])
     write_line('FMSY/M', as.numeric(null_to_na(doc$constants[1, "FMSY.M"])))
@@ -250,8 +250,8 @@ ffdbdoc_to_dlmtool_csv <- function (doc, output = stdout()) {
     write_line('CV Length-weight parameter b', as.numeric(null_to_na(doc$cv[1, "Length-weight_parameter_b"])))
     write_line('CV Steepness', as.numeric(NA))
     write_line('Sigma length composition', as.numeric(null_to_na(doc$cv[1, "length_composition"])))
-    write_line('Units', 'metric tonnes')
-    write_line('Reference OFL', as.numeric(NA))
+    write_line('Units', 'metric tonnes')  # TODO: Needs to be fetched directly
+    write_line('Reference OFL', as.numeric(null_to_na(doc$cv[1, "ref_ofl_limit"])))
     write_line('Reference OFL type', as.numeric(NA))
     write_line('MPrec', as.numeric(NA))
     write_line('LHYear', as.numeric(null_to_na(rownames(doc$catch)[[length(rownames(doc$catch))]])))
