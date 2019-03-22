@@ -101,6 +101,88 @@ json_df_to_ffdbdoc <- function (json_df) {
 }
 
 
+ffdbdoc_to_dlmtool <- function (ffdbdoc) {
+    f <- tempfile(fileext = ".csv")
+    ffdbdoc_to_dlmtool_csv(ffdbdoc, output = f)
+    d <- DLMtool::XL2Data(f)
+    unlink(f)
+    return(d)
+}
+
+
+dlmtool_csv_to_ffdbdoc <- function (in_file) {
+    d <- XL2Data(in_file)
+
+    # TODO: Parse this directly? Complain about bug?
+    caa <- as.data.frame(d@CAA[1,,])
+    # NB: We don't know the CAA absolute years, this gets thrown away in parsing, assume it's towards the end
+    rownames(caa) <- seq(d@LHYear - dim(caa)[1] + 1, d@LHYear)
+    colnames(caa) <- seq(1,dim(caa)[2])
+
+    cal <- rbind(as.data.frame(t(d@CAL_bins)), as.data.frame(cbind(d@CAL[1,,], rep(NA, length(d@CAL_bins) - dim(d@CAL)[3]))))
+    # NB: We don't know the CAL absolute years, this gets thrown away in parsing, assume it's towards the end
+    rownames(cal) <- c("Min Length", seq(d@LHYear - dim(cal)[1] + 2, d@LHYear))
+    colnames(cal) <- seq(1,dim(cal)[2])
+
+    list(
+        metadata = data.frame(
+            species = d@Name,
+            location = d@Region,
+            case_study = '',
+            row.names = c('value'),
+            stringsAsFactors = FALSE),
+        catch = data.frame(
+            catch = as.vector(d@Cat),
+            abundance_index_1 = as.vector(d@Ind),
+            row.names = d@Year),
+        caa = caa,
+        cal = cal,
+        constants = data.frame(
+            "avg_catch_over_time" = c(d@AvC, ""),
+            "depletion_over_time" = c(d@Dt, ""),
+            "M" = c(d@Mort, ""),
+            "FMSY/M" = c(d@FMSY_M, ""),
+            "BMSY/B0" = c(d@BMSY_B0, ""),
+            # "MSY" = c(d@, ""),  # TODO: These values in CSV are ignored, would need to fetch directly
+            # "BMSY" = c(d@, ""),  # TODO: These values in CSV are ignored, would need to fetch directly
+            "length_at_50pc_maturity" = c(d@L50, ""),
+            "length_at_95pc_maturity" = c(d@L95, ""),
+            "length_at_first_capture" = c(d@LFC, ""),
+            "length_at_full_selection" = c(d@LFS, ""),
+            "current_stock_depletion" = c(d@Dep, ""),
+            "current_stock_abundance" = c(d@Abun, ""),
+            "Von_Bertalanffy_K" = c(d@vbK, ""),
+            "Von_Bertalanffy_Linf" = c(d@vbLinf, ""),
+            "Von_Bertalanffy_t0" = c(d@vbt0, ""),
+            "Length-weight_parameter_a" = c(d@wla, ""),
+            "Length-weight_parameter_b" = c(d@wlb, ""),
+            "maximum_age" = c(d@MaxAge, ""),
+            "ref_ofl_limit" = c(d@Ref, ""),  # TODO: Right?
+            row.names = c('value', 'source'),
+            stringsAsFactors = FALSE),
+        cv = data.frame(
+            row.names = c('value', 'source'),
+            "catch" = c(d@CV_Cat, ""),
+            "depletion_over_time" = c(d@CV_Dt, ""),
+            "avg_catch_over_time" = c(d@CV_AvC, ""),
+            "abundance_index" = c(d@CV_Ind, ""),
+            "M" = c(d@CV_Mort, ""),
+            "FMSY/M" = c(d@CV_FMSY_M, ""),
+            "BMSY/B0" = c(d@CV_BMSY_B0, ""),
+            "current_stock_depletion" = c(d@CV_Dep, ""),
+            "current_stock_abundance" = c(d@CV_Abun, ""),
+            "Von_Bertalanffy_K" = c(d@CV_vbK, ""),
+            "Von_Bertalanffy_Linf" = c(d@CV_vbLinf, ""),
+            "Von_Bertalanffy_t0" = c(d@CV_vbt0, ""),
+            "length_at_50pc_maturity" = c(d@CV_L50, ""),
+            "length_at_first_capture" = c(d@CV_LFC, ""),
+            "length_at_full_selection" = c(d@CV_LFS, ""),
+            "Length-weight_parameter_a" = c(d@CV_wla, ""),
+            "Length-weight_parameter_b" = c(d@CV_wlb, ""),
+            "length_composition" = c(d@sigmaL, ""),
+            stringsAsFactors = FALSE))
+}
+
 # (internal use only) Given (doc) from ffdb_fetch(), write a DLMtool-compatible csv to the (output) file handle
 ffdbdoc_to_dlmtool_csv <- function (doc, output = stdout()) {
     null_to_na <- function (x) { ifelse(is.null(x), NA, ifelse(identical(x, "NA"), NA, x)) }
