@@ -189,7 +189,11 @@ ffdbdoc_to_dlmtool_csv <- function (doc, output = stdout()) {
 
     first_line <- TRUE
     write_line <- function(line_name, x) {
-        cat(line_name, x, "\n", file = output, sep=",", append=!(first_line))
+        cat(paste0(c(line_name, x), collapse = ","),
+            "\r\n",
+            sep="",
+            file = output,
+            append=!(first_line))
         first_line <<- FALSE
     }
 
