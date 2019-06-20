@@ -18,6 +18,18 @@ Symlink this directory into the shiny server root, for example:
 
     ln -rs . /srv/shiny-server/ffdb-dlmtool
 
+## Configuration
+
+At very least an empty ``local-config.js`` file is required:
+
+    echo "" > local-config.js
+
+Google analytics can be enabled by adding a tracking ID to ``local-config.js``:
+
+    echo 'window.ga_code = "UA-12345-6";' > local-config.js
+
+Set the tracking ID to ``UA-XXXXX-Y`` to debug the GA integration.
+
 ## Authors
 
 * [Jamie Lentin](https://github.com/lentinj) - jamie.lentin@shuttlethread.com

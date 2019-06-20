@@ -11,6 +11,8 @@ ui <- fluidPage(
       column(9, "Farfish DLMtool")
     )
   , windowTitle = "Farfish DLMtool"),
+  tags$head(includeScript("local-config.js")),
+  tags$head(includeScript("tracking.js")),
 
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
@@ -33,7 +35,7 @@ ui <- fluidPage(
     # Main panel for displaying outputs ----
     mainPanel(
 
-      tabsetPanel(type = "tabs",
+      tabsetPanel(type = "tabs", id = "main_tabs",
                   tabPanel("Catch / Abundance Index Plot",
                       plotOutput("catchPlot", height=600),
                       downloadButton("catchPlotDownload", label = "Download plot")),
