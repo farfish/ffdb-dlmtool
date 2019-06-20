@@ -27,7 +27,7 @@ server <- function(input, output, session) {
   })
 
   conn <- poolCheckout(pool)
-  updateSelectInput(session, "document_name", choices = ffdb_list('dlmtool', instance = conn), selected = "demo-cobia")
+  updateSelectInput(session, "document_name", choices = ffdb_list('dlmtool', instance = conn))
   poolReturn(conn)
 
   dlm_doc <- reactive({

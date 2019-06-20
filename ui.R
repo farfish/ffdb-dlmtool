@@ -21,7 +21,8 @@ ui <- fluidPage(
       selectInput(
           "document_name",
           "Document name",
-          list()),
+          list('demo-cobia'),
+          'demo-cobia'),
 
       a("Upload/edit data in FFDB", href="/upload"),
       br(),
