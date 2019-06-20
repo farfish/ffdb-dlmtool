@@ -8,9 +8,9 @@ ui <- fluidPage(
         width = 89, height = 83,
         src = "https://www.farfish.eu/wp-content/uploads/2017/08/FarFish-300x281.png"
       )),
-      column(9, "Farfish DLMtool")
+      column(9, "FarFish DLMtool")
     )
-  , windowTitle = "Farfish DLMtool"),
+  , windowTitle = "FarFish DLMtool"),
   tags$head(includeScript("local-config.js")),
   tags$head(includeScript("tracking.js")),
 
