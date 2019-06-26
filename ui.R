@@ -2,17 +2,12 @@
 ui <- fluidPage(
 
   # App title ----
-  titlePanel(
-    fluidRow(
-      column(1, img(
-        width = 89, height = 83,
-        src = "https://www.farfish.eu/wp-content/uploads/2017/08/FarFish-300x281.png"
-      )),
-      column(9, "FarFish DLMtool")
-    )
-  , windowTitle = "FarFish DLMtool"),
-  tags$head(includeScript("local-config.js")),
-  tags$head(includeScript("tracking.js")),
+  tags$head(
+      tags$link(rel="stylesheet", type="text/css", href="//fonts.googleapis.com/css?family=Open+Sans:400,600"),
+      includeCSS("header.css"),
+      includeScript("local-config.js"),
+      includeScript("tracking.js")),
+  includeHTML("header.html"),
 
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
@@ -26,7 +21,7 @@ ui <- fluidPage(
           list(),
           ''),
 
-      a("Upload/edit data in FFDB", href="/upload"),
+      a("Upload/edit data in FFDB", href="/upload?template=dlmtool"),
       br(),
       br(),
       downloadButton("download_csv", "Download DLMtool CSV")
