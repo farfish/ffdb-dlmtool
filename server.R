@@ -34,7 +34,7 @@ server <- function(input, output, session) {
     if (nchar(input$document_name) > 0) {
         return(ffdb_to_dlmtool(input$document_name, instance = conn))
     } else {
-        return(ffdb_to_dlmtool('demo-cobia', instance = conn))
+        return(NULL)
     }
   })
 
