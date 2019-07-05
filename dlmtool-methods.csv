@@ -69,7 +69,7 @@
 "output","Ltarget4","Length target MP (more biologically precautionary)","Length","TAC is adjusted to reach a target mean length"
 "output","MCD","Mean Catch Depletion MP","Catch","MP to demonstrate high information content of depletion OFL = mean catches x 2 x dep "
 "output","MCD4010","MCD linked to a 40-10 rule","Catch","A 40-10 harvest control rule is added to the MCD MP"
-"output","Nref","No reference point","Catch","Sets catch = 0."
+"output","NFref","No reference point","Catch","A reference MP that sets annual catch to almost zero (0.01)"
 "output","Rcontrol","R-control MP","LH","A demographic prior for intrinsic rate of increase is used to firm up surplus production calculation of G-control"
 "output","Rcontrol2","Rcontrol with quadratic SP-B relationship","LH","As Rcontrol but fits a quadratic relationship to the derivative of SP with stock biomass"
 "output","SBT1","Southern Bluefin Tuna 1","EmInd","An MP that adjusts TACs according to apparent trend in CPUE"
@@ -114,3 +114,4 @@
 "","LtargetE1", "Length Target TAE MP"
 "","LtargetE4", "Length Target TAE MP"
 "","minlenLopt1", "Size limit management procedures"
+"","AvC_MLL","Average Catch with a size limit","","A example mixed control MP that uses the average catch output control MP together with a minimul size limit set at the size of maturity."
