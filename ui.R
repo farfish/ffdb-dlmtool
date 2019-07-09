@@ -5,6 +5,7 @@ ui <- fluidPage(
   tags$head(
       tags$link(rel="stylesheet", type="text/css", href="//fonts.googleapis.com/css?family=Open+Sans:400,600"),
       includeCSS("header.css"),
+      includeCSS("footer.css"),
       includeScript("local-config.js"),
       includeScript("tracking.js")),
   includeHTML("header.html"),
@@ -54,5 +55,6 @@ ui <- fluidPage(
                       tableOutput("mpTable"))
                   )
     )
-  )
+  ),
+  includeHTML("footer.html")
 )

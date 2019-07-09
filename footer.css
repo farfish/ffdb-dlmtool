@@ -1,0 +1,18 @@
+body>div>div.row {
+    /* Make sure main content expands so footer is on the bottom of short pages */
+    min-height: calc(100vh - 10rem - 3rem - 100px);
+}
+
+footer {
+    margin-top: 2rem;
+    margin-left: -15px;
+    margin-right: -15px;
+    padding: 1rem;
+    min-height: 10rem;
+    background-color: #222;
+    color: #CCC;
+}
+footer > img {
+    float: left;
+    margin-right: 1rem;
+}
