@@ -39,7 +39,15 @@ server <- function(input, output, session) {
     }
   })
 
-  catchPlot <- function () {
+  plotPlusDownload <- function (fn_name, fn) {
+      output[[fn_name]] <- renderPlot({ fn() })
+      output[[paste0(fn_name, 'Download')]] <- downloadHandler(
+        filename = function() { paste(input$document_name, ".", fn_name, ".png", sep="") },
+        content = function(file) { png(file) ; print(fn()) ; dev.off() }
+      )
+  }
+
+  plotPlusDownload('catchPlot', function () {
     d <- dlm_doc()
     catch <- data.frame(year=as.character(d@Year), catch=d@Cat[1,], ind=d@Ind[1,])
 
@@ -57,14 +65,9 @@ server <- function(input, output, session) {
         theme(axis.title.x = element_blank()) +
         scale_x_discrete(catch$year)
     p1 + p2 + plot_layout(ncol = 1)
-  }
-  output$catchPlot <- renderPlot({ catchPlot() })
-  output$catchPlotDownload <- downloadHandler(
-      filename = function() { paste(input$document_name, ".catchPlot.png", sep="") },
-      content = function(file) { png(file) ; print(catchPlot()) ; dev.off() }
-  )
+  })
 
-  caaPlot <- function () {
+  plotPlusDownload('caaPlot', function () {
     d <- dlm_doc()
     caa <- d@CAA[1,,]
     dimnames(caa) <- list(
@@ -73,14 +76,9 @@ server <- function(input, output, session) {
     
     ggplot(as.data.frame(as.table(caa)), aes(age,Freq)) +
         geom_bar(stat="identity")+facet_wrap(~year)
-  }
-  output$caaPlot <- renderPlot({ caaPlot() })
-  output$caaPlotDownload <- downloadHandler(
-      filename = function() { paste(input$document_name, ".caaPlot.png", sep="") },
-      content = function(file) { png(file) ; print(caaPlot()) ; dev.off() }
-  )
+  })
 
-  calPlot <- function () {
+  plotPlusDownload('calPlot', function () {
     d <- dlm_doc()
     cal <- d@CAL[1,,]
     dimnames(cal)<-list(
@@ -95,22 +93,12 @@ server <- function(input, output, session) {
         geom_bar(stat="identity") + 
         scale_x_discrete(labels = label_positions) +
         facet_wrap(~year)
-  }
-  output$calPlot <- renderPlot({ calPlot() })
-  output$calPlotDownload <- downloadHandler(
-      filename = function() { paste(input$document_name, ".calPlot.png", sep="") },
-      content = function(file) { png(file) ; print(calPlot()) ; dev.off() }
-  )
+  })
 
-  parameterDistributionsPlot <- function () {
+  plotPlusDownload('parameterDistributionsPlot', function () {
     d <- dlm_doc()
     summary(d, wait=FALSE, plots=c('PD'))
-  }
-  output$parameterDistributionsPlot <- renderPlot({ parameterDistributionsPlot() })
-  output$parameterDistributionsPlotDownload <- downloadHandler(
-      filename = function() { paste(input$document_name, ".parameterDistributionsPlot.png", sep="") },
-      content = function(file) { png(file) ; print(parameterDistributionsPlot()) ; dev.off() }
-  )
+  })
 
   output$download_csv <- downloadHandler(
       filename = function() {
@@ -139,16 +127,11 @@ server <- function(input, output, session) {
     out[with(out, order(Direction, Code)), c('Direction', 'Code', 'Name', 'Type', 'Reason')]
   }, sanitize.text.function = function(x) x)  # NB: Disable HTML escaping for help links
 
-  mpBoxPlot <- function () {
+  plotPlusDownload('mpBoxPlot', function () {
     d <- dlm_doc()
     d_tac <- runMP(d, reps=1000)
     boxplot(d_tac)
-  }
-  output$mpBoxPlot <- renderPlot({ mpBoxPlot() })
-  output$mpBoxPlotDownload <- downloadHandler(
-      filename = function() { paste(input$document_name, ".mpBoxPlot.png", sep="") },
-      content = function(file) { png(file) ; print(mpBoxPlot()) ; dev.off() }
-  )
+  })
 
   output$mpTable <- renderTable({
     d <- dlm_doc()
