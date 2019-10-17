@@ -42,7 +42,7 @@ ffdb_fetch <- function (template_name, document_name, convert = TRUE, instance =
         res <- dbSendQuery(instance, paste0(
             "SELECT content",
             " FROM document",
-            " WHERE template_name = 'dlmtool'",
+            " WHERE template_name = '", template_name, "'",
             " AND document_name = '", document_name, "'",
             " ORDER BY version DESC",
             " LIMIT 1",
