@@ -9,6 +9,7 @@ library(data.table)
 options(shiny.sanitize.errors = FALSE)
 
 source('ffdbclient.R')
+source('spicttools.R')
 source('dlmtool_glossary.R')
 # Cache DLMtool data objects as we create them
 ffdb_to_dlmtool <- memoise(ffdb_to_dlmtool)
@@ -37,6 +38,20 @@ server <- function(input, output, session) {
     } else {
         return(NULL)
     }
+  })
+
+  spict_doc <- reactive({
+    if (nchar(input$document_name) > 0) {
+        return(ffdbdoc_to_spictstock(
+            dlmtool_fixup(ffdb_fetch('dlmtool', input$document_name, instance = conn)),
+            seaprod = input$spict_seaprod,
+            timevaryinggrowth = input$spict_timevaryinggrowth))
+    } else {
+        return(NULL)
+    }
+  })
+  spict_fit <- reactive({
+    fit.spict(spict_doc())
   })
 
   plotPlusDownload <- function (fn_name, fn) {
@@ -140,6 +155,27 @@ server <- function(input, output, session) {
     out$Code <- dlmtool_help_link(out$Code)
     out[which(out$Direction == 'output'), colnames(out) != 'Direction']
   }, sanitize.text.function = function(x) x)  # NB: Disable HTML escaping for help links
+
+  plotPlusDownload('spictDataPlot', function () {
+    st <- spict_doc()
+    plotspict.data(st)
+  })
+
+  output$spictFitMessage <- renderPrint({
+    spict_fit()
+  })
+  plotPlusDownload('spictFitPlot', function () {
+    fit <- spict_fit()
+    if (fit$opt$convergence == 0) {
+      plot(fit)
+    }
+  })
+
+  plotPlusDownload('spictDiagnosticsPlot', function () {
+    fit <- spict_fit()
+
+    plotspict.diagnostic(calc.osa.resid(fit))
+  })
 }
 
 # conn <- poolCheckout(pool)

@@ -1,3 +1,10 @@
+var monitor_tabs = {
+    'document_name': true,
+    'main_tabs': true,
+    'dlmtool_tabs': true,
+    'spict_tabs': true,
+};
+
 if (window.ga_code) {
 
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -18,7 +25,7 @@ if (window.ga_code) {
     });
 
     $(document).on('shiny:inputchanged', function(e) {
-        if (e.name === 'main_tabs' || e.name === 'document_name') {
+        if (monitor_tabs[e.name]) {
             ga('send', 'event', 'widget', e.name, e.value);
         }
     });

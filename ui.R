@@ -33,20 +33,23 @@ ui <- fluidPage(
     # Main panel for displaying outputs ----
     mainPanel(
 
-      tabsetPanel(type = "tabs", id = "main_tabs",
-                  tabPanel("Catch / Abundance Index Plot",
-                      withSpinner(plotOutput("catchPlot", height=600)),
-                      downloadButton("catchPlotDownload", label = "Download plot")),
-                  tabPanel("CAA",
-                      withSpinner(plotOutput("caaPlot", height=600)),
-                      downloadButton("caaPlotDownload", label = "Download plot")),
-                  tabPanel("CAL",
-                      withSpinner(plotOutput("calPlot", height=600)),
-                      downloadButton("calPlotDownload", label = "Download plot")),
+      tabsetPanel(id = "main_tabs",
+          tabPanel(
+              "Catch / Abundance Index",
+              withSpinner(plotOutput("catchPlot", height=600)),
+              downloadButton("catchPlotDownload", label = "Download plot")),
+          tabPanel("CAA",
+              withSpinner(plotOutput("caaPlot", height=600)),
+              downloadButton("caaPlotDownload", label = "Download plot")),
+          tabPanel("CAL",
+              withSpinner(plotOutput("calPlot", height=600)),
+              downloadButton("calPlotDownload", label = "Download plot")),
+          tabPanel("DLMTool",
+              tabsetPanel(id = "dlmtool_tabs",
                   tabPanel("Parameter Distributions",
                       withSpinner(plotOutput("parameterDistributionsPlot", height=600)),
                       downloadButton("parameterDistributionsPlotDownload", label = "Download plot")),
-                  tabPanel("Diagnostics",
+                  tabPanel("DLMTool Diagnostics",
                       h2("Enough data to produce"),
                       tableOutput("canTable"),
                       h2("Cannot produce"),
@@ -54,8 +57,21 @@ ui <- fluidPage(
                   tabPanel("TAC Plot",
                       withSpinner(plotOutput("mpBoxPlot")),
                       downloadButton("mpBoxPlotDownload", label = "Download plot"),
-                      tableOutput("mpTable"))
-                  )
+                      tableOutput("mpTable")))),
+          tabPanel("SPiCt",
+              checkboxInput("spict_seaprod", "Seasonal Productivity", value = FALSE),
+              checkboxInput("spict_timevaryinggrowth", "Time-varying growth", value = FALSE),
+              tabsetPanel(id = "spict_tabs",
+                  tabPanel("SPiCt visualization",
+                      withSpinner(plotOutput("spictDataPlot"))
+                      ),
+                  tabPanel("SPiCt results summary",
+                      withSpinner(plotOutput("spictFitPlot")),
+                      withSpinner(verbatimTextOutput("spictFitMessage"))
+                      ),
+                  tabPanel("SPiCt diagnostics plot",
+                      withSpinner(plotOutput("spictDiagnosticsPlot"))
+                      ))))
     )
   ),
   includeHTML("footer.html")
