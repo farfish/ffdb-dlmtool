@@ -72,13 +72,21 @@ ffdb_fetch <- function (template_name, document_name, convert = TRUE, instance =
 # Fetch a document and convert directly to a dlmtool Data object
 # example: ffdb_to_dlmtool('demo-cobia')
 ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
-    doc <- ffdb_fetch('dlmtool', document_name, instance = instance)
+    doc <- dlmtool_fixup(ffdb_fetch('dlmtool', document_name, instance = instance))
 
     f <- tempfile(fileext = ".csv")
     ffdbdoc_to_dlmtool_csv(doc, output = f)
     d <- DLMtool::XL2Data(f)
     unlink(f)
     return(d)
+}
+
+dlmtool_fixup <- function (doc) {
+    if (!('abundance_index' %in% names(doc))) {
+        doc$abundance_index <- doc$catch[,c('abundance_index_1'), drop = FALSE]
+    }
+
+    return(doc)
 }
 
 
@@ -134,8 +142,9 @@ dlmtool_csv_to_ffdbdoc <- function (in_file) {
             stringsAsFactors = FALSE),
         catch = data.frame(
             catch = as.vector(d@Cat),
-            abundance_index_1 = as.vector(d@Ind),
             row.names = d@Year),
+        abundance_index = data.frame(
+            abundance_index_1 = as.vector(d@Ind)),
         caa = caa,
         cal = cal,
         constants = data.frame(
@@ -198,11 +207,18 @@ ffdbdoc_to_dlmtool_csv <- function (doc, output = stdout()) {
         first_line <<- FALSE
     }
 
-    write_line('Name', as.character(doc$metadata[1, "species"]))
-    write_line('Year', as.numeric(rownames(doc$catch)))
-    for (i in seq_len(ncol(doc$catch))) {
-        write_line(ifelse(i == 1, 'Catch', 'Abundance index'), as.numeric(doc$catch[,i]))
+    rownames_to_num <- function (rnames) {
+        coalesce <- function (x, def) { ifelse(is.na(x), def, x) }
+
+        vapply(strsplit(rnames, "_"), function (c) {
+            strtoi(c[[1]]) + (coalesce(strtoi(c[2]), 1) - 1) / 12
+        }, 0)
     }
+
+    write_line('Name', as.character(doc$metadata[1, "species"]))
+    write_line('Year', rownames_to_num(rownames(doc$catch)))
+    write_line('Catch', as.numeric(doc$catch[,1]))
+    write_line("Abundance index", as.numeric(doc$abundance_index[,1]))
     write_line('Duration t', length(rownames(doc$catch)))
     write_line('Average catch over time t', doc$constants[1, "avg_catch_over_time"])
     write_line('Depletion over time t', doc$constants[1, "depletion_over_time"])
