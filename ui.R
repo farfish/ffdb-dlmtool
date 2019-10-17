@@ -1,3 +1,5 @@
+library(shinycssloaders)
+
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
 
@@ -33,16 +35,16 @@ ui <- fluidPage(
 
       tabsetPanel(type = "tabs", id = "main_tabs",
                   tabPanel("Catch / Abundance Index Plot",
-                      plotOutput("catchPlot", height=600),
+                      withSpinner(plotOutput("catchPlot", height=600)),
                       downloadButton("catchPlotDownload", label = "Download plot")),
                   tabPanel("CAA",
-                      plotOutput("caaPlot", height=600),
+                      withSpinner(plotOutput("caaPlot", height=600)),
                       downloadButton("caaPlotDownload", label = "Download plot")),
                   tabPanel("CAL",
-                      plotOutput("calPlot", height=600),
+                      withSpinner(plotOutput("calPlot", height=600)),
                       downloadButton("calPlotDownload", label = "Download plot")),
                   tabPanel("Parameter Distributions",
-                      plotOutput("parameterDistributionsPlot", height=600),
+                      withSpinner(plotOutput("parameterDistributionsPlot", height=600)),
                       downloadButton("parameterDistributionsPlotDownload", label = "Download plot")),
                   tabPanel("Diagnostics",
                       h2("Enough data to produce"),
@@ -50,7 +52,7 @@ ui <- fluidPage(
                       h2("Cannot produce"),
                       tableOutput("cantTable")),
                   tabPanel("TAC Plot",
-                      plotOutput("mpBoxPlot"),
+                      withSpinner(plotOutput("mpBoxPlot")),
                       downloadButton("mpBoxPlotDownload", label = "Download plot"),
                       tableOutput("mpTable"))
                   )
