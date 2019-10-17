@@ -36,7 +36,7 @@ ffdb_list <- function (template_name, instance = 'ffdb.farfish.eu') {
 
 # Fetch an FFDB document, convert it into a list of data frames
 # example: ffdb_fetch('dlmtool', 'demo-cobia')
-ffdb_fetch <- function (template_name, document_name, convert = TRUE, instance = 'ffdb.farfish.eu') {
+ffdb_fetch <- function (template_name, document_name, convert = TRUE, instance = 'https://ffdb.farfish.eu') {
     if (class(instance) == "PqConnection") {
         # instance is a database connection, fetch directly
         res <- dbSendQuery(instance, paste0(
@@ -52,7 +52,8 @@ ffdb_fetch <- function (template_name, document_name, convert = TRUE, instance =
         out <- fromJSON(out$content)
     } else {
         # Instance is a hostname, fetch via. HTTP
-        req <- GET(paste0('https://', instance, '/api/doc/', template_name, '/', document_name),
+        uri <- paste0(instance, '/api/doc/', template_name, '/', document_name)
+        req <- GET(uri,
             add_headers('Accept' = "application/json"))
         if (http_error(req)) {
             stop(sprintf("Request failed: status %s - URL '%s'", status_code(req), uri))
