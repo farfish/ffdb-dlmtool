@@ -212,19 +212,26 @@ ffdbdoc_to_dlmtool_csv <- function (doc, output = stdout()) {
         first_line <<- FALSE
     }
 
-    rownames_to_num <- function (rnames) {
-        coalesce <- function (x, def) { ifelse(is.na(x), def, x) }
-
-        vapply(strsplit(rnames, "_"), function (c) {
-            strtoi(c[[1]]) + (coalesce(strtoi(c[2]), 1) - 1) / 12
-        }, 0)
-    }
-
     write_line('Name', as.character(doc$metadata[1, "species"]))
-    write_line('Year', rownames_to_num(rownames(doc$catch)))
-    write_line('Catch', as.numeric(doc$catch[,1]))
-    write_line("Abundance index", as.numeric(doc$abundance_index[,1]))
-    write_line('Duration t', length(rownames(doc$catch)))
+
+    # Merge catch and abundance index data
+    combined <- merge(
+        doc$catch[,c('catch'),drop = FALSE],  # i.e. don't pick up any old abundance_index
+        doc$abundance_index,
+        by = "row.names", all.x = TRUE, all.y = TRUE)
+    combined$year <- gsub('_[0-9]+$', '', combined$Row.names)
+    # Combine years together
+    combined <- aggregate(combined, list(year = combined$year), function (x) {
+        out <- mean(suppressWarnings(as.numeric(x)), na.rm = TRUE)
+        out <- ifelse(is.nan(out), NA, out)
+        out
+    })
+    combined <- combined[order(as.numeric(combined$year)),]
+
+    write_line('Year', combined$year)
+    write_line('Catch', combined$catch)
+    write_line("Abundance index", combined$abundance_index_1)
+    write_line('Duration t', length(combined$year))
     write_line('Average catch over time t', doc$constants[1, "avg_catch_over_time"])
     write_line('Depletion over time t', doc$constants[1, "depletion_over_time"])
     write_line('M', doc$constants[1, "M"])
@@ -280,5 +287,5 @@ ffdbdoc_to_dlmtool_csv <- function (doc, output = stdout()) {
     write_line('Reference OFL', as.numeric(null_to_na(doc$cv[1, "ref_ofl_limit"])))
     write_line('Reference OFL type', as.numeric(NA))
     write_line('MPrec', as.numeric(NA))
-    write_line('LHYear', as.numeric(null_to_na(rownames(doc$catch)[[length(rownames(doc$catch))]])))
+    write_line('LHYear', as.numeric(null_to_na(combined$year[[length(combined$year)]])))
 }
