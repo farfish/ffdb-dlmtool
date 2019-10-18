@@ -88,6 +88,7 @@ ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
 dlmtool_fixup <- function (doc) {
     if (!('abundance_index' %in% names(doc))) {
         doc$abundance_index <- doc$catch[,c('abundance_index_1'), drop = FALSE]
+        doc$abundance_index$abundance_index_1 <- as.numeric(doc$abundance_index$abundance_index_1)
     }
 
     return(doc)
