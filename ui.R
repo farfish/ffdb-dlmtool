@@ -16,7 +16,7 @@ ui <- fluidPage(
   sidebarLayout(
 
     # Sidebar panel for inputs ----
-    sidebarPanel(
+    sidebarPanel(width = 3,
 
       selectInput(
           "document_name",
