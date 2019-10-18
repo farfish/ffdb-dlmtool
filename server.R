@@ -63,23 +63,61 @@ server <- function(input, output, session) {
   }
 
   plotPlusDownload('catchPlot', function () {
-    d <- dlm_doc()
-    catch <- data.frame(year=as.character(d@Year), catch=d@Cat[1,], ind=d@Ind[1,])
+    doc <- ffdb_fetch('dlmtool', input$document_name, instance = conn)
+    rownames_to_num <- function (rnames) {
+        coalesce <- function (x, def) { ifelse(is.na(x), def, x) }
 
+        vapply(strsplit(rnames, "_"), function (c) {
+            strtoi(c[[1]]) + (coalesce(strtoi(c[2]), 1) - 1) / 12
+        }, 0)
+    }
+
+    year_only <- function (x) {
+        ifelse(grepl('_', x, fixed = TRUE),
+            ifelse(endsWith(x, "_1"), sub('_1$', '', x), ''),
+            x)
+    }
+    season_only <- function (x) {
+        factor(as.numeric(ifelse(grepl('_', x, fixed = TRUE), sub('^[0-9]+_', '', x), "1")))
+    }
+    month_pallete <- c(
+        "1"  = "#666666",
+        "2"  = "#333333",
+        "3"  = "#000000",
+        "4"  = "#00FF00",
+        "5"  = "#00CC00",
+        "6"  = "#009900",
+        "7"  = "#FF0000",
+        "8"  = "#CC0000",
+        "9"  = "#990000",
+        "10" = "#0000FF",
+        "11" = "#0000CC",
+        "12" = "#000099"
+    )
+
+    doc$catch$year <- rownames(doc$catch)
+    doc$catch$season <- season_only(rownames(doc$catch))
     theme_set(theme_bw())
-    p1<-ggplot(catch, aes(year,catch)) +
+    p <- ggplot(doc$catch, aes(year, catch, fill = season)) +
         geom_bar(stat="identity") +
         ylab("Catch (in tonnes)") +
-        theme(text = element_text(size=11), axis.text.x = element_text(angle = 90, hjust = 1)) +
+        theme(text = element_text(size=11), axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
         theme(axis.title.x = element_blank()) +
-        scale_x_discrete(catch$year)
-    p2<-ggplot(catch, aes(year,ind)) +
-        geom_bar(stat="identity") +
-        ylab("Relative abundance") +
-        theme(text = element_text(size=11), axis.text.x = element_text(angle = 90, hjust = 1)) +
-        theme(axis.title.x = element_blank()) +
-        scale_x_discrete(catch$year)
-    p1 + p2 + plot_layout(ncol = 1)
+        scale_fill_manual(values = month_pallete) +
+        scale_x_discrete(limits = doc$catch$year, labels = year_only(doc$catch$year))
+
+    for (n in names(doc$abundance_index)) {
+        doc$abundance_index$year <- rownames(doc$abundance_index)
+        doc$abundance_index$season <- season_only(rownames(doc$abundance_index))
+        p <- p + ggplot(doc$abundance_index, aes_string("year", n, fill = "season")) +
+            geom_bar(stat="identity") +
+            ylab(n) +
+            theme(text = element_text(size=11), axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+            theme(axis.title.x = element_blank()) +
+            scale_fill_manual(values = month_pallete) +
+            scale_x_discrete(limits = doc$abundance_index$year, labels = year_only(doc$abundance_index$year))
+    }
+    return(p + plot_layout(ncol = 1))
   })
 
   plotPlusDownload('caaPlot', function () {
