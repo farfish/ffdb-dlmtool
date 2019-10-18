@@ -44,5 +44,5 @@ ffdbdoc_to_spictstock <- function (doc, seaprod = FALSE, timevaryinggrowth = FAL
         return(rownames_to_num(names(obsI)))
     })
 
-    return(samplestock)
+    return(check.inp(samplestock))
 }
