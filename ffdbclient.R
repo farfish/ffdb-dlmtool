@@ -63,7 +63,11 @@ ffdb_fetch <- function (template_name, document_name, convert = TRUE, instance =
     }
 
     if (convert) {
-        return(lapply(out, json_df_to_ffdbdoc))
+        out <- lapply(out, json_df_to_ffdbdoc)
+
+        if (template_name == 'dlmtool') {
+            out <- dlmtool_fixup(out)
+        }
     }
     return(out)
 }
@@ -72,7 +76,7 @@ ffdb_fetch <- function (template_name, document_name, convert = TRUE, instance =
 # Fetch a document and convert directly to a dlmtool Data object
 # example: ffdb_to_dlmtool('demo-cobia')
 ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
-    doc <- dlmtool_fixup(ffdb_fetch('dlmtool', document_name, instance = instance))
+    doc <- ffdb_fetch('dlmtool', document_name, instance = instance)
 
     f <- tempfile(fileext = ".csv")
     ffdbdoc_to_dlmtool_csv(doc, output = f)
