@@ -28,7 +28,7 @@ ffdbdoc_to_spictstock <- function (doc, seaprod = FALSE, timevaryinggrowth = FAL
     samplestock<-list(
         seasontype = 1,  # use the spline-based representation of seasonality
         splineorder = 3,
-        seaprod = ifelse(seaprod, 3, 0),  # TODO: Right way around?
+        seaprod = ifelse(seaprod, 3, 0),
         timevaryinggrowth = timevaryinggrowth,
         dteuler = 1/16)
 
@@ -42,7 +42,6 @@ ffdbdoc_to_spictstock <- function (doc, seaprod = FALSE, timevaryinggrowth = FAL
     })
     samplestock$timeI <- lapply(samplestock$obsI, function (obsI) {
         return(rownames_to_num(names(obsI)))
-        # TODO: Is there an equivalent to nseasons?
     })
 
     return(samplestock)
