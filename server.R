@@ -80,6 +80,12 @@ server <- function(input, output, session) {
     season_only <- function (x) {
         factor(as.numeric(ifelse(grepl('_', x, fixed = TRUE), sub('^[0-9]+_', '', x), "1")))
     }
+    season_labels <- function (season) {
+        m_start <- levels(season)
+        if (length(m_start) >= 12) return(m_start)
+        m_end <- c(as.numeric(m_start[-1]) - 1, 12)
+        structure(paste0(m_start, "..", m_end), names = m_start)
+    }
     month_pallete <- c(
         "1"  = "#666666",
         "2"  = "#333333",
@@ -103,7 +109,7 @@ server <- function(input, output, session) {
         ylab("Catch (in tonnes)") +
         theme(text = element_text(size=11), axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
         theme(axis.title.x = element_blank()) +
-        scale_fill_manual(values = month_pallete) +
+        scale_fill_manual(values = month_pallete, labels = season_labels(doc$catch$season)) +
         scale_x_discrete(limits = doc$catch$year, labels = year_only(doc$catch$year))
 
     for (n in names(doc$abundance_index)) {
@@ -114,7 +120,7 @@ server <- function(input, output, session) {
             ylab(n) +
             theme(text = element_text(size=11), axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
             theme(axis.title.x = element_blank()) +
-            scale_fill_manual(values = month_pallete) +
+            scale_fill_manual(values = month_pallete, labels = season_labels(doc$abundance_index$season)) +
             scale_x_discrete(limits = doc$abundance_index$year, labels = year_only(doc$abundance_index$year))
     }
     return(p + plot_layout(ncol = 1))
