@@ -55,6 +55,7 @@ ui <- fluidPage(
                       h2("Cannot produce"),
                       tableOutput("cantTable")),
                   tabPanel("TAC Plot",
+                      p(strong("Please Note:"), "This tool cannot be used for management purposes, it requires previous knowledge or training on stock assessment theory"),
                       withSpinner(plotOutput("mpBoxPlot")),
                       downloadButton("mpBoxPlotDownload", label = "Download plot"),
                       tableOutput("mpTable")))),
