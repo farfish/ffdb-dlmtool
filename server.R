@@ -102,25 +102,25 @@ server <- function(input, output, session) {
     )
 
     doc$catch$year <- rownames(doc$catch)
-    doc$catch$season <- season_only(rownames(doc$catch))
+    doc$catch$month <- season_only(rownames(doc$catch))
     theme_set(theme_bw())
-    p <- ggplot(doc$catch, aes(year, catch, fill = season)) +
+    p <- ggplot(doc$catch, aes(year, catch, fill = month)) +
         geom_bar(stat="identity") +
         ylab("Catch (in tonnes)") +
         theme(text = element_text(size=11), axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
         theme(axis.title.x = element_blank()) +
-        scale_fill_manual(values = month_pallete, labels = season_labels(doc$catch$season)) +
+        scale_fill_manual(values = month_pallete, labels = season_labels(doc$catch$month)) +
         scale_x_discrete(limits = doc$catch$year, labels = year_only(doc$catch$year))
 
     for (n in names(doc$abundance_index)) {
         doc$abundance_index$year <- rownames(doc$abundance_index)
-        doc$abundance_index$season <- season_only(rownames(doc$abundance_index))
-        p <- p + ggplot(doc$abundance_index, aes_string("year", n, fill = "season")) +
+        doc$abundance_index$month <- season_only(rownames(doc$abundance_index))
+        p <- p + ggplot(doc$abundance_index, aes_string("year", n, fill = "month")) +
             geom_bar(stat="identity") +
             ylab(n) +
             theme(text = element_text(size=11), axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
             theme(axis.title.x = element_blank()) +
-            scale_fill_manual(values = month_pallete, labels = season_labels(doc$abundance_index$season)) +
+            scale_fill_manual(values = month_pallete, labels = season_labels(doc$abundance_index$month)) +
             scale_x_discrete(limits = doc$abundance_index$year, labels = year_only(doc$abundance_index$year))
     }
     return(p + plot_layout(ncol = 1))
