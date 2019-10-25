@@ -198,7 +198,7 @@ server <- function(input, output, session) {
     if (length(MPs) == 0) MPs <- NA
 
     d_tac <- runMP(d, MPs = MPs, reps=1000, silent = TRUE)
-    results <- boxplot(d_tac)
+    results <- boxplot(d_tac, col = "#237aa5")
 
     # Update legend with available MPs
     if (is.na(MPs)) {
