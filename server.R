@@ -186,19 +186,31 @@ server <- function(input, output, session) {
     out[with(out, order(Direction, Code)), c('Direction', 'Code', 'Name', 'Type', 'Reason')]
   }, sanitize.text.function = function(x) x)  # NB: Disable HTML escaping for help links
 
+  document_mps <- observeEvent(input$document_name, {
+    # Document changed, so clear legend checkboxes
+    updateCheckboxGroupInput(session, "mpLegend", choices = c(''), selected = c())
+  })
   plotPlusDownload('mpBoxPlot', function () {
     d <- dlm_doc()
-    d_tac <- runMP(d, reps=1000)
-    boxplot(d_tac)
-  })
 
-  output$mpTable <- renderTable({
-    d <- dlm_doc()
-    # Find all possible output methods
-    out <- merge(data.frame(Code = Can(d), stringsAsFactors = FALSE), dlmtool_methods, by = "Code")
-    out$Code <- dlmtool_help_link(out$Code)
-    out[which(out$Direction == 'output'), colnames(out) != 'Direction']
-  }, sanitize.text.function = function(x) x)  # NB: Disable HTML escaping for help links
+    # Restrict to selected MPs if any selected
+    MPs <- input$mpLegend
+    if (length(MPs) == 0) MPs <- NA
+
+    d_tac <- runMP(d, MPs = MPs, reps=1000, silent = TRUE)
+    results <- boxplot(d_tac)
+
+    # Update legend with available MPs
+    if (is.na(MPs)) {
+        MPs <- rev(as.character(results$MP))
+        updateCheckboxGroupInput(session, "mpLegend",
+            choiceValues = MPs,
+            choiceNames = lapply(unname(MPs), function (m) {
+                span(HTML(dlmtool_help_link(m)),
+                    span(dlmtool_method_info(m)['description'], style="float:right;width:calc(100% - 10rem);padding-bottom:1rem"))
+            }))
+    }
+  })
 
   plotPlusDownload('spictDataPlot', function () {
     st <- spict_doc()
