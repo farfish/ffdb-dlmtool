@@ -4,7 +4,13 @@ Presents various analyses of data stored in FFDB.
 
 ## Prerequisites
 
-R and shiny server need to be installed, follow instructions at https://www.rstudio.com/products/shiny/download-server/
+Firstly, R and required C libraries:
+
+    apt install r-base \
+        libxml2-dev libcurl4-openssl-dev zlib1g-dev libgit2-dev \
+        libblas-dev liblapack-dev gfortran
+
+...then install shiny server, follow instructions at https://www.rstudio.com/products/shiny/download-server/
 
 ## Installation
 
