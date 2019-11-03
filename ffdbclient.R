@@ -168,7 +168,7 @@ dlmtool_csv_to_ffdbdoc <- function (in_file) {
     list(
         metadata = data.frame(
             species = d@Name,
-            location = d@Region,
+            location = ifelse(length(d@Region), d@Region, as.character(NA)),
             case_study = '',
             row.names = c('value'),
             stringsAsFactors = FALSE),
@@ -204,10 +204,10 @@ dlmtool_csv_to_ffdbdoc <- function (in_file) {
             stringsAsFactors = FALSE),
         cv = data.frame(
             row.names = c('value', 'source'),
-            "catch" = c(d@CV_Cat, ""),
+            # "catch" = c(d@CV_Cat, ""),  # TODO:
             "depletion_over_time" = c(d@CV_Dt, ""),
             "avg_catch_over_time" = c(d@CV_AvC, ""),
-            "abundance_index" = c(d@CV_Ind, ""),
+            # "abundance_index" = c(d@CV_Ind, ""),  # TODO:
             "M" = c(d@CV_Mort, ""),
             "FMSY/M" = c(d@CV_FMSY_M, ""),
             "BMSY/B0" = c(d@CV_BMSY_B0, ""),
@@ -221,7 +221,7 @@ dlmtool_csv_to_ffdbdoc <- function (in_file) {
             "length_at_full_selection" = c(d@CV_LFS, ""),
             "Length-weight_parameter_a" = c(d@CV_wla, ""),
             "Length-weight_parameter_b" = c(d@CV_wlb, ""),
-            "length_composition" = c(d@sigmaL, ""),
+            # "length_composition" = c(d@sigmaR, ""),  # TODO:
             stringsAsFactors = FALSE))
 }
 
