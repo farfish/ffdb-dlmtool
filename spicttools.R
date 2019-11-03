@@ -34,11 +34,13 @@ ffdbdoc_to_spictstock <- function (doc, seaprod = FALSE, timevaryinggrowth = FAL
 
     samplestock$obsC <- col_to_vec(doc$catch, 'catch')
     samplestock$obsC <- ifelse(samplestock$obsC < 0.001, 0.001, samplestock$obsC)
+    # NB: We're re-parsing rownames so we don't include times for NA data points
     samplestock$timeC <- rownames_to_num(names(samplestock$obsC))
     samplestock$nseasons <- count_seasons(samplestock$timeC)
 
-    samplestock$obsI <- lapply(structure(names(doc$abundance_index), names = names(doc$abundance_index)), function (ai_name) {
-        return(col_to_vec(doc$abundance_index, ai_name))
+    indices <- grep('abundance_index_', names(doc), value = TRUE)
+    samplestock$obsI <- lapply(structure(indices, names = indices), function (ai_name) {
+        return(col_to_vec(doc[[ai_name]], 'index'))
     })
     samplestock$timeI <- lapply(samplestock$obsI, function (obsI) {
         return(rownames_to_num(names(obsI)))
