@@ -175,8 +175,9 @@ dlmtool_csv_to_ffdbdoc <- function (in_file) {
         catch = data.frame(
             catch = as.vector(d@Cat),
             row.names = d@Year),
-        abundance_index = data.frame(
-            abundance_index_1 = as.vector(d@Ind)),
+        abundance_index_1 = data.frame(
+            index = as.vector(d@Ind),
+            row.names = d@Year),
         caa = caa,
         cal = cal,
         constants = data.frame(
