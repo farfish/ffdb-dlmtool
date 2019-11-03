@@ -245,7 +245,7 @@ ffdbdoc_to_dlmtool_csv <- function (doc, output = stdout()) {
     # Merge catch and abundance index data
     combined <- merge(
         doc$catch[,c('catch'),drop = FALSE],  # i.e. don't pick up any old abundance_index
-        doc$abundance_index,
+        doc$abundance_index_1,
         by = "row.names", all.x = TRUE, all.y = TRUE)
     combined$year <- gsub('_[0-9]+$', '', combined$Row.names)
     # Combine years together
@@ -258,7 +258,7 @@ ffdbdoc_to_dlmtool_csv <- function (doc, output = stdout()) {
 
     write_line('Year', combined$year)
     write_line('Catch', combined$catch)
-    write_line("Abundance index", combined$abundance_index_1)
+    write_line("Abundance index", combined$index)
     write_line('Duration t', length(combined$year))
     write_line('Average catch over time t', doc$constants[1, "avg_catch_over_time"])
     write_line('Depletion over time t', doc$constants[1, "depletion_over_time"])
