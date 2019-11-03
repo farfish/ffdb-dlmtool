@@ -86,9 +86,36 @@ ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
 }
 
 dlmtool_fixup <- function (doc) {
-    if (!('abundance_index' %in% names(doc))) {
-        doc$abundance_index <- doc$catch[,c('abundance_index_1'), drop = FALSE]
-        doc$abundance_index$abundance_index_1 <- as.numeric(doc$abundance_index$abundance_index_1)
+    coalesce <- function (x, def) { ifelse(is.na(x), def, x) }
+
+    # v1 --> v2: Move catch$abundance_index into it's own table
+    if ('abundance_index_1' %in% names(doc$catch)) {
+        doc$abundance_index_1 <- doc$catch[,c('abundance_index_1'), drop = FALSE]
+        doc$abundance_index_1$abundance_index_1 <- as.numeric(doc$abundance_index$abundance_index_1)
+        names(doc$abundance_index_1) <- c('index')
+    }
+
+    # v2 --> v3: Move abundance_index columns into their own tables
+    if ('abundance_index' %in% names(doc)) {
+        for (n in colnames(doc$abundance_index)) {
+            doc[[n]] <- doc$abundance_index[,c(n), drop = FALSE]
+            names(doc[[n]]) <- c('index')
+        }
+    }
+
+    for (n in grep('^catch$|^abundance_index_', names(doc), value = TRUE)) {
+        if ('month' %in% names(doc[[n]])) {
+            custom_month <- suppressWarnings(as.numeric(doc[[n]]$month))
+        } else {
+            custom_month <- rep(NA, nrow(doc[[n]]))
+        }
+        # Default to 1, same as dimension_timeseries:update_init
+        month <- vapply(strsplit(rownames(doc[[n]]), "_"), function (x) {
+            as.integer(ifelse(length(x) > 1, x[[2]], 1))
+        }, integer(1))
+        doc[[n]]$year <- vapply(strsplit(rownames(doc[[n]]), "_"), function (x) { as.integer(x[[1]]) }, integer(1))
+        doc[[n]]$month <- ifelse(is.na(custom_month), month, custom_month)
+        rownames(doc[[n]]) <- paste(doc[[n]]$year, doc[[n]]$month, sep = "_")
     }
 
     return(doc)
