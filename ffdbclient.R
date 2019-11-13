@@ -37,6 +37,7 @@ ffdb_list <- function (template_name, instance = 'ffdb.farfish.eu') {
 # Fetch an FFDB document, convert it into a list of data frames
 # example: ffdb_fetch('dlmtool', 'demo-cobia')
 ffdb_fetch <- function (template_name, document_name, convert = TRUE, instance = 'https://ffdb.farfish.eu') {
+    out <- NULL
     if (class(instance) == "PqConnection") {
         # instance is a database connection, fetch directly
         res <- dbSendQuery(instance, paste0(
@@ -49,7 +50,13 @@ ffdb_fetch <- function (template_name, document_name, convert = TRUE, instance =
             ""))
         out <- dbFetch(res)
         dbClearResult(res)
-        out <- fromJSON(out$content)
+        if ('content' %in% names(out)) {
+            # Output might be data.frame() of a pq_jsonb type, depending on DB versions
+            out <- as.character(out$content)
+        }
+        if (length(out) > 0) {
+            out <- fromJSON(out)
+        }
     } else {
         # Instance is a hostname, fetch via. HTTP
         uri <- paste0(instance, '/api/doc/', template_name, '/', document_name)
