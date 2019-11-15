@@ -27,7 +27,6 @@ ui <- fluidPage(
       a("Upload/edit data in FFDB", href="/upload?template=dlmtool"),
       br(),
       br(),
-      downloadButton("download_csv", "Download DLMtool CSV")
     ),
 
     # Main panel for displaying outputs ----
@@ -45,6 +44,7 @@ ui <- fluidPage(
               withSpinner(plotOutput("calPlot", height=600)),
               downloadButton("calPlotDownload", label = "Download plot")),
           tabPanel("DLMTool",
+              a(id = "download_csv", class = "btn btn-link shiny-download-link", icon("download"), "Download DLMtool CSV"),
               tabsetPanel(id = "dlmtool_tabs",
                   tabPanel("Parameter Distributions",
                       withSpinner(plotOutput("parameterDistributionsPlot", height=600)),
