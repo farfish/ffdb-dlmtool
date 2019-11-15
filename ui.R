@@ -44,7 +44,7 @@ ui <- fluidPage(
               withSpinner(plotOutput("calPlot", height=600)),
               downloadButton("calPlotDownload", label = "Download plot")),
           tabPanel("DLMTool",
-              a(id = "download_csv", class = "btn btn-link shiny-download-link", icon("download"), "Download DLMtool CSV"),
+              a(id = "download_dlmcsv", class = "btn btn-link shiny-download-link", icon("download"), "Download DLMtool CSV"),
               tabsetPanel(id = "dlmtool_tabs",
                   tabPanel("Parameter Distributions",
                       withSpinner(plotOutput("parameterDistributionsPlot", height=600)),
@@ -61,6 +61,7 @@ ui <- fluidPage(
                       checkboxGroupInput("mpLegend", "MPs to show:", inline = TRUE)
                       ))),
           tabPanel("SPiCt",
+              a(id = "download_spict", class = "btn btn-link shiny-download-link", icon("download"), "Download SPiCt data object"),
               checkboxInput("spict_seaprod", "Seasonal Productivity", value = FALSE),
               checkboxInput("spict_timevaryinggrowth", "Time-varying growth", value = FALSE),
               p("For more information on SPiCt, please see the", a("SPiCt guideline document", href = "https://github.com/DTUAqua/spict/blob/master/spict/vignettes/spict_guidelines.pdf")),

@@ -126,7 +126,7 @@ server <- function(input, output, session) {
     summary(d, wait=FALSE, plots=c('PD'))
   })
 
-  output$download_csv <- downloadHandler(
+  output$download_dlmcsv <- downloadHandler(
       filename = function() {
           paste(input$document_name, ".csv", sep="")
       },
@@ -178,6 +178,16 @@ server <- function(input, output, session) {
             }))
     }
   })
+
+  output$download_spict <- downloadHandler(
+      filename = function() {
+          paste(input$document_name, ".RData", sep="")
+      },
+      content = function(file) {
+          st <- spict_doc()
+          save(st, file = file)
+      }
+  )
 
   plotPlusDownload('spictDataPlot', function () {
     st <- spict_doc()
