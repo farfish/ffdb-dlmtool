@@ -26,7 +26,7 @@ ui <- fluidPage(
 
       a("Upload/edit data in FFDB", href="/upload?template=dlmtool"),
       br(),
-      br(),
+      br()
     ),
 
     # Main panel for displaying outputs ----
