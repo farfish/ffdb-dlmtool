@@ -2,29 +2,6 @@ library(spict)
 
 
 ffdbdoc_to_spictstock <- function (doc, seaprod = FALSE, timevaryinggrowth = FALSE) {
-    rownames_to_num <- function (rnames) {
-        coalesce <- function (x, def) { ifelse(is.na(x), def, x) }
-
-        vapply(strsplit(rnames, "_"), function (c) {
-            strtoi(c[[1]]) + (coalesce(strtoi(c[2]), 1) - 1) / 12
-        }, 0)
-    }
-
-    count_seasons <- function (rnames) {
-        years <- floor(rnames)
-        # Maximum unique value count (i.e. number of values in a year)
-        max(table(floor(years)))
-    }
-
-    col_to_vec <- function (tbl, col_name) {
-        # Extract column, applying rownames
-        out <- structure(
-            suppressWarnings(as.numeric(tbl[, col_name])),
-            names=rownames(tbl))
-
-        out[!is.na(out)]
-    }
-
     samplestock<-list(
         seasontype = 1,  # use the spline-based representation of seasonality
         splineorder = 3,
@@ -32,19 +9,29 @@ ffdbdoc_to_spictstock <- function (doc, seaprod = FALSE, timevaryinggrowth = FAL
         timevaryinggrowth = timevaryinggrowth,
         dteuler = 1/16)
 
-    samplestock$obsC <- col_to_vec(doc$catch, 'catch')
-    samplestock$obsC <- ifelse(samplestock$obsC < 0.001, 0.001, samplestock$obsC)
-    # NB: We're re-parsing rownames so we don't include times for NA data points
-    samplestock$timeC <- rownames_to_num(names(samplestock$obsC))
-    samplestock$nseasons <- count_seasons(samplestock$timeC)
+    # Turn tables into obs/time lists
+    indices <- grep('^catch$|^abundance_index_', names(doc), value = TRUE)
+    data <- lapply(structure(indices, names = indices), function (tbl_name) {
+        value_col <- ifelse(tbl_name == 'catch', 'catch', 'index')
+        tbl <- doc[[tbl_name]][!is.na(doc[[tbl_name]][[value_col]]), ]
 
-    indices <- grep('abundance_index_', names(doc), value = TRUE)
-    samplestock$obsI <- lapply(structure(indices, names = indices), function (ai_name) {
-        return(col_to_vec(doc[[ai_name]], 'index'))
+        list(
+            obs = tbl[[value_col]],
+            time = tbl$year + ((tbl$month - 1) %/% 3) / 4  # Floor to nearest quarter
+        )
     })
-    samplestock$timeI <- lapply(samplestock$obsI, function (obsI) {
-        return(rownames_to_num(names(obsI)))
-    })
+
+    # Add catch to obsC/timeC
+    samplestock$obsC <- ifelse(data$catch$obs < 0.001, 0.001, data$catch$obs)
+    samplestock$timeC <- data$catch$time
+    data$catch <- NULL
+
+    # Add everything else to obsI/timeI
+    samplestock$obsI <- lapply(data, function (d) d$obs)
+    samplestock$timeI <- lapply(data, function (d) d$time)
+
+    # Count seasons in catch data
+    samplestock$nseasons <- max(spict::annual(samplestock$timeC, samplestock$timeC, type = length)$annvec)
 
     return(check.inp(samplestock))
 }
