@@ -252,7 +252,7 @@ ffdbdoc_to_dlmtool_csv <- function (doc, output = stdout()) {
     # Merge catch and abundance index data
     combined <- merge(
         doc$catch[,c('catch'),drop = FALSE],  # i.e. don't pick up any old abundance_index
-        doc$abundance_index_1,
+        doc[[grep('^abundance_index_', names(doc), value = TRUE)[[1]]]],
         by = "row.names", all.x = TRUE, all.y = TRUE)
     combined$year <- gsub('_[0-9]+$', '', combined$Row.names)
     # Combine years together

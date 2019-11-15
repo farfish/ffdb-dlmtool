@@ -228,4 +228,11 @@ ok_group("dlmtool_csv_to_ffdbdoc/ffdbdoc_to_dlmtool_csv", {
     ok(cmp_identical(gsub('\r|\n', '', csv_out[[4]]),
         'Abundance index,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,0.72,0.71,0.81,0.36,0.36,0.71,1.18,0.88,0.81,0.55,1.72,1.34,1.05,1.19,1.32,0.56,0.94,0.86,0.9,1.28,1.34,0.9,1.11,1.08,1.08,0.94,1.54,1.96,0.93,0.88,0.94'
         ), "Regenerated abundance index line")
+
+    # Rename abundance index, can still read it
+    names(doc) <- ifelse(names(doc) == "abundance_index_1", "abundance_index_camel", names(doc))
+    csv_out <- capture.output(ffdbdoc_to_dlmtool_csv(doc))
+    ok(cmp_identical(gsub('\r|\n', '', csv_out[[4]]),
+        'Abundance index,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,0.72,0.71,0.81,0.36,0.36,0.71,1.18,0.88,0.81,0.55,1.72,1.34,1.05,1.19,1.32,0.56,0.94,0.86,0.9,1.28,1.34,0.9,1.11,1.08,1.08,0.94,1.54,1.96,0.93,0.88,0.94'
+        ), "Regenerated abundance index line with different name")
 })
