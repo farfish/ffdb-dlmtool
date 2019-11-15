@@ -67,14 +67,14 @@ ui <- fluidPage(
               p("For more information on SPiCt, please see the", a("SPiCt guideline document", href = "https://github.com/DTUAqua/spict/blob/master/spict/vignettes/spict_guidelines.pdf")),
               tabsetPanel(id = "spict_tabs",
                   tabPanel("SPiCt visualization",
-                      withSpinner(plotOutput("spictDataPlot"))
+                      withSpinner(plotOutput("spictDataPlot", height = "700px"))
                       ),
                   tabPanel("SPiCt results summary",
-                      withSpinner(plotOutput("spictFitPlot")),
+                      withSpinner(plotOutput("spictFitPlot", height = "700px")),
                       withSpinner(verbatimTextOutput("spictFitMessage"))
                       ),
                   tabPanel("SPiCt diagnostics plot",
-                      withSpinner(plotOutput("spictDiagnosticsPlot"))
+                      withSpinner(plotOutput("spictDiagnosticsPlot", height = "700px"))
                       ))))
     )
   ),
