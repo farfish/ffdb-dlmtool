@@ -12,7 +12,7 @@ ok_group("json_df_to_ffdbdoc", {
           values = c('2000', '2001', '2002')
       )
   )
-  ok(cmp_identical(json_df_to_ffdbdoc(json_df), data.frame(
+  ok(ut_cmp_identical(json_df_to_ffdbdoc(json_df), data.frame(
       catch = c(NA, 200.0, 104.5),  # "NA" converted to NA
       abundance_index = c(NA, 100.0, 104.5),  # "" converted to NA
       some_string = c("cuthbert", "dibble", "grub"),  # Haven't converted string vectors into NA
@@ -27,7 +27,7 @@ ok_group("dlmtool_fixup", {
             row.names = c('2001', '2002', '2003', '2004'),
             stringsAsFactors = FALSE)
     ))
-    ok(cmp_identical(out, list(
+    ok(ut_cmp_identical(out, list(
         catch = data.frame(
             catch = c(100, 200, 300, 400),
             abundance_index_1 = c(1, 2, 3, 4),
@@ -54,7 +54,7 @@ ok_group("dlmtool_fixup", {
             row.names = c('2001', '2002', '2003', '2004'),
             stringsAsFactors = FALSE)
     ))
-    ok(cmp_identical(out, list(
+    ok(ut_cmp_identical(out, list(
         catch = data.frame(
             catch = c(100, 200, 300, 400),
             year = as.integer(c(2001, 2002, 2003, 2004)),
@@ -87,7 +87,7 @@ ok_group("dlmtool_fixup", {
             row.names = c('2001_1', '2001_6', '2002_1', '2002_6'),
             stringsAsFactors = FALSE)
     ))
-    ok(cmp_identical(out$abundance_index_pelagio, data.frame(
+    ok(ut_cmp_identical(out$abundance_index_pelagio, data.frame(
             month = c(2, 6, 1, 7),
             index = c(1, 2, 3, 4),
             year = as.integer(c(2001, 2001, 2002, 2002)),
@@ -207,32 +207,32 @@ ok_group("dlmtool_csv_to_ffdbdoc/ffdbdoc_to_dlmtool_csv", {
         NULL), con = tfile)
     doc <- dlmtool_csv_to_ffdbdoc(tfile)
 
-    ok(cmp_equal(doc$catch, data.frame(
+    ok(ut_cmp_equal(doc$catch, data.frame(
         catch = c(104.7, 112.2, 111.3, 128.3, 149.8, 137.8, 162.7, 191.1, 174.9, 205.1, 193.7, 211.9, 224.5, 243.5, 228.2, 233.7, 234.3, 243.5, 250.1, 256.7, 265.3, 292.5, 306.9, 326.1, 348.5, 372.4, 366.9, 374.6, 383.3, 388.1, 387, 221.1, 351.1, 58.8, 467.8, 780.6, 1172, 425.6, 379.2, 524.9, 485.8, 812.3, 567.2, 378.9, 417, 736.3, 1025.7, 694.6, 549.8, 593.8, 639.6, 549.4, 415.3, 1152.9, 1196.4, 1139.9, 1272.4, 832.8, 609.6, 1002.9, 1081.1, 508.2),
         row.names = c("1950", "1951", "1952", "1953", "1954", "1955", "1956", "1957", "1958", "1959", "1960", "1961", "1962", "1963", "1964", "1965", "1966", "1967", "1968", "1969", "1970", "1971", "1972", "1973", "1974", "1975", "1976", "1977", "1978", "1979", "1980", "1981", "1982", "1983", "1984", "1985", "1986", "1987", "1988", "1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011"),
         stringsAsFactors = FALSE), tolerance = 0.1), "Extracted Catch")
 
-    ok(cmp_equal(doc$abundance_index_1, data.frame(
+    ok(ut_cmp_equal(doc$abundance_index_1, data.frame(
         index = c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 0.72, 0.71, 0.81, 0.36, 0.36, 0.71, 1.18, 0.88, 0.81, 0.55, 1.72, 1.34, 1.05, 1.19, 1.32, 0.56, 0.94, 0.86, 0.9, 1.28, 1.34, 0.9, 1.11, 1.08, 1.08, 0.94, 1.54, 1.96, 0.93, 0.88, 0.94),
         row.names = c("1950", "1951", "1952", "1953", "1954", "1955", "1956", "1957", "1958", "1959", "1960", "1961", "1962", "1963", "1964", "1965", "1966", "1967", "1968", "1969", "1970", "1971", "1972", "1973", "1974", "1975", "1976", "1977", "1978", "1979", "1980", "1981", "1982", "1983", "1984", "1985", "1986", "1987", "1988", "1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011"),
         stringsAsFactors = FALSE), tolerance = 0.1), "Extracted abundance index")
 
     csv_out <- capture.output(ffdbdoc_to_dlmtool_csv(doc))
 
-    ok(cmp_identical(gsub('\r|\n', '', csv_out[[2]]),
+    ok(ut_cmp_identical(gsub('\r|\n', '', csv_out[[2]]),
         'Year,1950,1951,1952,1953,1954,1955,1956,1957,1958,1959,1960,1961,1962,1963,1964,1965,1966,1967,1968,1969,1970,1971,1972,1973,1974,1975,1976,1977,1978,1979,1980,1981,1982,1983,1984,1985,1986,1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011'
         ), "Regenerated year line")
-    ok(cmp_identical(gsub('\r|\n', '', csv_out[[3]]),
+    ok(ut_cmp_identical(gsub('\r|\n', '', csv_out[[3]]),
         'Catch,104.7041,112.2076,111.3035,128.2866,149.8358,137.8407,162.6785,191.1055,174.8697,205.1042,193.6927,211.9442,224.5489,243.4949,228.18,233.6636,234.335,243.5222,250.102,256.6638,265.3008,292.4982,306.8911,326.1419,348.4901,372.3603,366.9158,374.6132,383.2823,388.0752,386.9656,221.0598,351.1051,58.81046,467.757,780.5817,1172.018,425.6042,379.1633,524.9385,485.7943,812.2792,567.1677,378.9292,416.9975,736.258,1025.696,694.5527,549.7592,593.7511,639.5925,549.412,415.3012,1152.859,1196.393,1139.915,1272.444,832.8092,609.6495,1002.917,1081.082,508.2434'
         ), "Regenerated catch line")
-    ok(cmp_identical(gsub('\r|\n', '', csv_out[[4]]),
+    ok(ut_cmp_identical(gsub('\r|\n', '', csv_out[[4]]),
         'Abundance index,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,0.72,0.71,0.81,0.36,0.36,0.71,1.18,0.88,0.81,0.55,1.72,1.34,1.05,1.19,1.32,0.56,0.94,0.86,0.9,1.28,1.34,0.9,1.11,1.08,1.08,0.94,1.54,1.96,0.93,0.88,0.94'
         ), "Regenerated abundance index line")
 
     # Rename abundance index, can still read it
     names(doc) <- ifelse(names(doc) == "abundance_index_1", "abundance_index_camel", names(doc))
     csv_out <- capture.output(ffdbdoc_to_dlmtool_csv(doc))
-    ok(cmp_identical(gsub('\r|\n', '', csv_out[[4]]),
+    ok(ut_cmp_identical(gsub('\r|\n', '', csv_out[[4]]),
         'Abundance index,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,0.72,0.71,0.81,0.36,0.36,0.71,1.18,0.88,0.81,0.55,1.72,1.34,1.05,1.19,1.32,0.56,0.94,0.86,0.9,1.28,1.34,0.9,1.11,1.08,1.08,0.94,1.54,1.96,0.93,0.88,0.94'
         ), "Regenerated abundance index line with different name")
 })
