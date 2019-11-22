@@ -58,6 +58,7 @@ ui <- fluidPage(
                       p(strong("Please Note:"), "This tool cannot be used for management purposes, it requires previous knowledge or training on stock assessment theory"),
                       withSpinner(plotOutput("mpBoxPlot")),
                       downloadButton("mpBoxPlotDownload", label = "Download plot"),
+                      downloadButton("mpResultDownload", label = "Download result table"),
                       checkboxGroupInput("mpLegend", "MPs to show:", inline = TRUE)
                       ))),
           tabPanel("SPiCt",

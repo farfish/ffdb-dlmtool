@@ -157,18 +157,21 @@ server <- function(input, output, session) {
     # Document changed, so clear legend checkboxes
     updateCheckboxGroupInput(session, "mpLegend", choices = c(''), selected = c())
   })
-  plotPlusDownload('mpBoxPlot', function () {
+  dlm_tac <- reactive({
     d <- dlm_doc()
 
     # Restrict to selected MPs if any selected
     MPs <- input$mpLegend
     if (length(MPs) == 0) MPs <- NA
 
-    d_tac <- runMP(d, MPs = MPs, reps=1000, silent = TRUE)
+    return(runMP(d, MPs = MPs, reps=1000, silent = TRUE))
+  })
+  output$mpBoxPlot <- renderPlot({
+    d_tac <- dlm_tac()
     results <- boxplot(d_tac, col = "#237aa5")
 
     # Update legend with available MPs
-    if (is.na(MPs)) {
+    if (length(input$mpLegend) == 0) {
         MPs <- rev(as.character(results$MP))
         updateCheckboxGroupInput(session, "mpLegend",
             choiceValues = MPs,
@@ -178,6 +181,26 @@ server <- function(input, output, session) {
             }))
     }
   })
+  output$mpBoxPlotDownload <- downloadHandler(
+      filename = function() { paste(input$document_name, ".mpBoxPlot.png", sep="") },
+      content = function(file) {
+          d_tac <- dlm_tac()
+
+          png(file)
+          boxplot(d_tac, col = "#237aa5")
+          dev.off()
+      }
+  )
+  output$mpResultDownload <- downloadHandler(
+      filename = function() { paste(input$document_name, ".mpResult.csv", sep="") },
+      content = function(file) {
+          d_tac <- dlm_tac()
+
+          pdf(file = NULL)  # NB: Using boxplot for it's result table, not it's plot
+          write.csv(boxplot(d_tac), file = file)
+          dev.off()
+      }
+  )
 
   output$download_spict <- downloadHandler(
       filename = function() {
