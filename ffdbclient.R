@@ -98,7 +98,6 @@ dlmtool_fixup <- function (doc) {
     # v1 --> v2: Move catch$abundance_index into it's own table
     if ('abundance_index_1' %in% names(doc$catch)) {
         doc$abundance_index_1 <- doc$catch[,c('abundance_index_1'), drop = FALSE]
-        doc$abundance_index_1$abundance_index_1 <- as.numeric(doc$abundance_index$abundance_index_1)
         names(doc$abundance_index_1) <- c('index')
     }
 
@@ -123,6 +122,13 @@ dlmtool_fixup <- function (doc) {
         doc[[n]]$year <- vapply(strsplit(rownames(doc[[n]]), "_"), function (x) { as.integer(x[[1]]) }, integer(1))
         doc[[n]]$month <- ifelse(is.na(custom_month), month, custom_month)
         rownames(doc[[n]]) <- paste(doc[[n]]$year, doc[[n]]$month, sep = "_")
+
+        # Make sure values are numeric, converting "NA" --> NA
+        if (n == 'catch') {
+            doc[[n]]$catch <- suppressWarnings(as.numeric(doc[[n]]$catch))
+        } else {
+            doc[[n]]$index <- suppressWarnings(as.numeric(doc[[n]]$index))
+        }
     }
 
     return(doc)
