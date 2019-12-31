@@ -65,3 +65,33 @@ ok_group("ffdbdoc_to_spictstock:nseasons", {
         "Data has 4 seasons, even though there's a gap")
 
 })
+
+ok_group("ffdbdoc_to_spictstock:options", {
+    cs <- function (constants) {
+        ffdbdoc_to_spictstock(dlmtool_fixup(list(
+            constants = constants,
+        catch = data.frame(
+            row.names = c('2000_1', '2000_4', '2000_7', '2001_1'),
+            catch = c(NA, 100, 110, 120),
+            stringsAsFactors = FALSE))))
+    }
+
+    st <- cs(data.frame(
+        stringsAsFactors = FALSE))
+    ok(ut_cmp_identical(st$seaprod, 0), "seaprod missing, so 0")
+    ok(ut_cmp_identical(st$timevaryinggrowth, FALSE), "timevaryinggrowth missing, so FALSE")
+
+    st <- cs(data.frame(
+        seaprod = c("", ""),
+        timevaryinggrowth = c("Y", ""),
+        stringsAsFactors = FALSE))
+    ok(ut_cmp_identical(st$seaprod, 0), "seaprod '', so 0")
+    ok(ut_cmp_identical(st$timevaryinggrowth, TRUE), "timevaryinggrowth Y, so TRUE")
+
+    st <- cs(data.frame(
+        seaprod = c("Y", ""),
+        timevaryinggrowth = c("", ""),
+        stringsAsFactors = FALSE))
+    ok(ut_cmp_identical(st$seaprod, 3), "seaprod 'Y', so 3")
+    ok(ut_cmp_identical(st$timevaryinggrowth, FALSE), "timevaryinggrowth '', so FALSE")
+})

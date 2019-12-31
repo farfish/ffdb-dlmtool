@@ -63,8 +63,6 @@ ui <- fluidPage(
                       ))),
           tabPanel("SPiCt",
               a(id = "download_spict", class = "btn btn-link shiny-download-link", icon("download"), "Download SPiCt data object"),
-              checkboxInput("spict_seaprod", "Seasonal Productivity", value = FALSE),
-              checkboxInput("spict_timevaryinggrowth", "Time-varying growth", value = FALSE),
               p("For more information on SPiCt, please see the", a("SPiCt guideline document", href = "https://github.com/DTUAqua/spict/blob/master/spict/vignettes/spict_guidelines.pdf")),
               tabsetPanel(id = "spict_tabs",
                   tabPanel("SPiCt visualization",

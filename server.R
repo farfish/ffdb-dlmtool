@@ -43,9 +43,7 @@ server <- function(input, output, session) {
   spict_doc <- reactive({
     if (nchar(input$document_name) > 0) {
         return(ffdbdoc_to_spictstock(
-            ffdb_fetch('dlmtool', input$document_name, instance = conn),
-            seaprod = input$spict_seaprod,
-            timevaryinggrowth = input$spict_timevaryinggrowth))
+            ffdb_fetch('dlmtool', input$document_name, instance = conn)))
     } else {
         return(NULL)
     }
