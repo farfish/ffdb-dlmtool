@@ -23,7 +23,7 @@ log <- function (...) {
 }
 
 # Convert arbitary object to blob::blob, for insertion into a BYTEA field
-encode_bytea <- function (object, for_postgres = FALSE) {
+encode_bytea <- function (object) {
     tf <- tempfile(fileext = ".rds")
     on.exit(unlink(tf))
 
@@ -39,6 +39,7 @@ decode_bytea <- function (raw) {
     # blob::blob is a list of raw, rs[1,1] will return a blob of one item
     # Extract that one item to a raw
     raw <- blob::as_blob(raw)[[1]]
+    if (is.null(raw)) return(NULL)
     writeBin(raw, tf)
     readRDS(tf)
 }
