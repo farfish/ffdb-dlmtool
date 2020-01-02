@@ -22,52 +22,12 @@ log <- function (...) {
     writeLines(paste(...), con = stderr())
 }
 
-# Convert arbitary object to blob::blob, for insertion into a BYTEA field
-encode_bytea <- function (object) {
-    tf <- tempfile(fileext = ".rds")
-    on.exit(unlink(tf))
-
-    saveRDS(object, file = tf)
-    blob::blob(readBin(tf, "raw", n = file.info(tf)$size))
-}
-
-# Convert blob::blob containing encode_bytea data back into it's object
-decode_bytea <- function (raw) {
-    tf <- tempfile(fileext = ".rds")
-    on.exit(unlink(tf))
-
-    # blob::blob is a list of raw, rs[1,1] will return a blob of one item
-    # Extract that one item to a raw
-    raw <- blob::as_blob(raw)[[1]]
-    if (is.null(raw)) return(NULL)
-    writeBin(raw, tf)
-    readRDS(tf)
-}
-
 # Assume query only returns one row, fetch and return it as a list
 fetch_one <- function (conn, sql, params = NULL) {
     rs <- dbSendQuery(conn, sql, params = params)
     on.exit(dbClearResult(rs))
     rows <- dbFetch(rs)
     return(if (nrow(rows) > 0) as.list(rows[1,]) else NA)
-}
-
-# Fetch & decode model output object
-get_model_output <- function (conn, template_name, document_name, model_name) {
-    row <- fetch_one(conn, "
-         SELECT output_rdata
-           FROM model_output
-          WHERE model_name = $3
-            AND input_hash = (
-                SELECT (input_hashes #>> ARRAY[$3]) -- NB: Get JSON value as text, not JSON object
-                  FROM document
-                 WHERE template_name = $1
-                   AND document_name = $2
-              ORDER BY version DESC
-                 LIMIT 1
-                )
-    ", params = list(template_name, document_name, model_name))
-    return(if (identical(row, NA)) NA else decode_bytea(row[1]))
 }
 
 # Generate Digest of DLMTool objects by CSVing first
