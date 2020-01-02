@@ -124,10 +124,12 @@ dlmtool_fixup <- function (doc) {
         rownames(doc[[n]]) <- paste(doc[[n]]$year, doc[[n]]$month, sep = "_")
 
         # Make sure values are numeric, converting "NA" --> NA
-        if (n == 'catch') {
+        if ('catch' %in% names(doc[[n]])) {
             doc[[n]]$catch <- suppressWarnings(as.numeric(doc[[n]]$catch))
-        } else {
+        } else if ('index' %in% names(doc[[n]])) {
             doc[[n]]$index <- suppressWarnings(as.numeric(doc[[n]]$index))
+        } else if ('abundance_index_1' %in% names(doc[[n]])) {
+            doc[[n]]$index <- suppressWarnings(as.numeric(doc[[n]]$abundance_index_1))
         }
     }
 
