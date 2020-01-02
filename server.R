@@ -42,14 +42,17 @@ server <- function(input, output, session) {
 
   spict_doc <- reactive({
     if (nchar(input$document_name) > 0) {
-        return(ffdbdoc_to_spictstock(
-            ffdb_fetch('dlmtool', input$document_name, instance = conn)))
+        return(ffdb_model_input('dlmtool', input$document_name, 'spict_fit', instance = conn))
     } else {
         return(NULL)
     }
   })
   spict_fit <- reactive({
-    fit.spict(spict_doc())
+    if (nchar(input$document_name) > 0) {
+        return(ffdb_model_output('dlmtool', input$document_name, 'spict_fit', instance = conn))
+    } else {
+        return(NULL)
+    }
   })
 
   plotPlusDownload <- function (fn_name, fn) {
