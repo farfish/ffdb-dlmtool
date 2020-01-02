@@ -41,7 +41,13 @@ sha1.Data <- function(x, digits = 14L, zapsmall = 7L, ..., algo = "sha1") {
 }
 
 listen_fns <- list(
-    document = function (conn, payload) {
+    document = list(stale = function (conn, payload) {
+        dbExecute(conn, "
+            SELECT pg_notify('document', template_name ||'/'|| document_name ||'/'|| version)
+              FROM document
+             WHERE input_hashes IS NULL
+        ")
+    }, event = function (conn, payload) {
         # Select from document for update
         row <- fetch_one(conn, "
             SELECT template_name, document_name, version, input_hashes
@@ -78,8 +84,14 @@ listen_fns <- list(
             row$document_name,
             row$version,
             jsonlite::toJSON(row$input_hashes, auto_unbox = TRUE)))
-    },
-    model_output = function (conn, payload) {
+    }),
+    model_output = list(stale = function (conn, payload) {
+        dbExecute(conn, "
+            SELECT pg_notify('model_output', model_name ||'/'|| input_hash)
+              FROM model_output
+             WHERE output_rdata IS NULL
+        ")
+    }, event = function (conn, payload) {
         row <- fetch_one(conn, "
             SELECT model_name, input_hash, input_rdata, output_rdata
               FROM model_output
@@ -111,16 +123,15 @@ worker <- function () {
 
     while(TRUE) {
         n <- RPostgres::postgresWaitForNotify(conn, 60)
-        if (is.null(n)) next
-
-        log(n$channel, n$payload)
-        tryCatch({
-            dbWithTransaction(conn, listen_fns[[n$channel]](conn, n$payload))
-        }, error = function (e) {
-            # Something went wrong. Report error and carry on
-            log("failed:", e$message)
-        })
-        log("==================")
+        if (is.null(n)) {
+            for (listen_name in names(listen_fns)) {
+                listen_fns[[listen_name]][['stale']](conn)
+            }
+        } else {
+            log(n$channel, n$payload)
+            dbWithTransaction(conn, listen_fns[[n$channel]][['event']](conn, n$payload))
+            log("==================")
+        }
     }
 }
 if (!interactive()) worker()
