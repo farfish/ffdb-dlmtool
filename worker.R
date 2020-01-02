@@ -93,7 +93,7 @@ listen_fns <- list(
         ")
     }, event = function (conn, payload) {
         row <- fetch_one(conn, "
-            SELECT model_name, input_hash, input_rdata, output_rdata
+            SELECT model_name, input_hash, input_rdata
               FROM model_output
              WHERE model_name = $1 AND input_hash = $2
                AND output_rdata IS NULL
@@ -101,17 +101,19 @@ listen_fns <- list(
         ", params = as.list(strsplit(payload, '/')[[1]]))
         if (identical(row, NA)) return()
 
-        row$output_rdata <- tryCatch(callr::r(
+        output_rdata <- encode_bytea(tryCatch(callr::r(
             model_fns[[row$model_name]][['model_output']],
             args = list(decode_bytea(row$input_rdata)),
-            timeout = 600), error = function (e) e)
+            timeout = 240), error = function (e) e))
 
+        # NB: Directly importing bytea is even more inefficient than importing a hex string, so do that
+        output_rdata <- paste(output_rdata[[1]], collapse = "")
         x <- dbExecute(conn, "
             UPDATE model_output
-               SET output_rdata = $3
+               SET output_rdata = DECODE($3, 'hex')
              WHERE model_name = $1 AND input_hash = $2
-        ", params = list(row$model_name, row$input_hash, encode_bytea(row$output_rdata)))
-    })
+        ", params = list(row$model_name, row$input_hash, output_rdata))
+    }))
 
 worker <- function () {
     conn <- dbConnect(RPostgres::Postgres(), dbname = 'ffdb_db')
