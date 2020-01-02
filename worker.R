@@ -60,7 +60,7 @@ listen_fns <- list(
 
         # Generate key-value of each model's hash
         doc <- ffdb_fetch(row$template_name, row$document_name, row$version, instance = conn)
-        model_inputs <- lapply(model_fns, function (fns) tryCatch(fns[['model_input']](doc), error = function (e) e))
+        model_inputs <- lapply(model_fns, function (fns) tryCatch(fns[['model_input']](doc), error = function (e) { log(e) ; e }))
         row$input_hashes <- lapply(model_inputs, digest::sha1)
 
         # Insert missing hashes into model output
