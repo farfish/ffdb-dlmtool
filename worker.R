@@ -122,7 +122,7 @@ listen_fns <- list(
         ", params = list(row$model_name, row$input_hash, output_path))
     }))
 
-worker <- function (model_dir) {
+worker <- function (model_dir, stale_check = 60) {
     conn <- dbConnect(RPostgres::Postgres(), dbname = 'ffdb_db')
     on.exit(dbDisconnect(conn))
 
@@ -131,7 +131,7 @@ worker <- function (model_dir) {
     }
 
     while(TRUE) {
-        n <- RPostgres::postgresWaitForNotify(conn, 60)
+        n <- RPostgres::postgresWaitForNotify(conn, stale_check)
         if (is.null(n)) {
             for (listen_name in names(listen_fns)) {
                 listen_fns[[listen_name]][['stale']](conn)
