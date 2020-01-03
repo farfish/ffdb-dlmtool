@@ -43,17 +43,27 @@ sha1.Data <- function(x, digits = 14L, zapsmall = 7L, ..., algo = "sha1") {
 listen_fns <- list(
     document = list(stale = function (conn, payload) {
         dbExecute(conn, "
-            SELECT pg_notify('document', template_name ||'/'|| document_name ||'/'|| version)
-              FROM document
-             WHERE input_hashes IS NULL
+            SELECT pg_notify('document', d.template_name ||'/'|| d.document_name ||'/'|| d.version)
+              FROM document d
+             WHERE d.input_hashes IS NULL
+               AND NOT EXISTS (SELECT version
+                                 FROM document
+                                WHERE template_name = d.template_name
+                                  AND document_name = d.document_name
+                                  AND version > d.version)
         ")
     }, event = function (model_dir, conn, payload) {
         # Select from document for update
         row <- fetch_one(conn, "
-            SELECT template_name, document_name, version, input_hashes
-              FROM document
-             WHERE template_name = $1 AND document_name = $2 AND version = $3
-               AND input_hashes IS NULL
+            SELECT d.template_name, d.document_name, d.version, d.input_hashes
+              FROM document d
+             WHERE d.template_name = $1 AND d.document_name = $2 AND d.version = $3
+               AND d.input_hashes IS NULL
+               AND NOT EXISTS (SELECT version
+                                 FROM document
+                                WHERE template_name = d.template_name
+                                  AND document_name = d.document_name
+                                  AND version > d.version)
                FOR UPDATE SKIP LOCKED
         ", params = as.list(strsplit(payload, '/')[[1]]))
         if (identical(row, NA)) return()
