@@ -36,7 +36,7 @@ Description=${PROJECT_NAME} instance %I
 After=network.target
 
 [Service]
-ExecStart=$(command -v Rscript) ${PROJECT_PATH}/worker.R
+ExecStart=$(command -v Rscript) ${PROJECT_PATH}/worker.R %S/${PROJECT_NAME}/%i
 WorkingDirectory=${PROJECT_PATH}
 StateDirectory=${PROJECT_NAME}/%i
 User=${SERVICE_USER}

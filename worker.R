@@ -153,6 +153,10 @@ worker <- function (model_dir, stale_check = 10) {
         }
     }
 }
-if (!interactive()) worker(
-    Sys.getenv('STATE_DIRECTORY', unset = normalizePath("./db")),
-    stale_check = as.integer(Sys.getenv('WORKER_STALE_CHECK', unset = "600")))
+
+if (!interactive()) {
+    args <- commandArgs(trailingOnly=TRUE)
+    worker(
+        normalizePath(args[[1]]),
+        stale_check = as.integer(Sys.getenv('WORKER_STALE_CHECK', unset = "600")))
+}
