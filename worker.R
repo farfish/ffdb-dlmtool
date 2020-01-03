@@ -122,7 +122,7 @@ listen_fns <- list(
         ", params = list(row$model_name, row$input_hash, output_path))
     }))
 
-worker <- function (model_dir, stale_check = 60) {
+worker <- function (model_dir, stale_check = 10) {
     conn <- dbConnect(RPostgres::Postgres(), dbname = 'ffdb_db')
     on.exit(dbDisconnect(conn))
 
@@ -143,4 +143,6 @@ worker <- function (model_dir, stale_check = 60) {
         }
     }
 }
-if (!interactive()) worker()
+if (!interactive()) worker(
+    Sys.getenv('STATE_DIRECTORY', unset = normalizePath("./db")),
+    stale_check = as.integer(Sys.getenv('WORKER_STALE_CHECK', unset = "600")))

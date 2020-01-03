@@ -9,11 +9,15 @@ PROJECT_PATH="${PROJECT_PATH-$(dirname "$(readlink -f "$0")")}"  # The full proj
 PROJECT_NAME="${PROJECT_NAME-$(basename "${PROJECT_PATH}")}"  # The project directory name, e.g. xxx
 PROJECT_MODE="${PROJECT_MODE-development}"  # The project mode, development or production
 
+SERVICE_USER="${SERVICE_USER-ffdb_dlmtool_worker}"
+
 if [ "${PROJECT_MODE}" = "development" ]; then
     SERVICE_INSTANCES="${SERVICE_INSTANCES-}"
 else
     SERVICE_INSTANCES="${SERVICE_INSTANCES-1 2 3}"
 fi
+
+adduser --system --no-create-home --group ${SERVICE_USER}
 
 # -----------------
 # Systemd unit file
@@ -34,7 +38,9 @@ After=network.target
 [Service]
 ExecStart=$(command -v Rscript) ${PROJECT_PATH}/worker.R
 WorkingDirectory=${PROJECT_PATH}
-DynamicUser=yes
+StateDirectory=${PROJECT_NAME}/%i
+User=${SERVICE_USER}
+Group=${SERVICE_USER}
 EnvironmentFile=/etc/systemd/system/${PROJECT_NAME}.env
 Restart=on-failure
 RestartSec=5s
