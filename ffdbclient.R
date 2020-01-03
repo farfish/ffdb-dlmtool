@@ -111,7 +111,7 @@ ffdb_model_output <- function (template_name, document_name, model_name, instanc
     if (class(instance) == "PqConnection") {
         # instance is a database connection, fetch directly
         res <- dbSendQuery(instance, "
-             SELECT output_rdata
+             SELECT output_path
                FROM model_output
               WHERE model_name = $3
                 AND input_hash = (
@@ -126,7 +126,7 @@ ffdb_model_output <- function (template_name, document_name, model_name, instanc
         on.exit(dbClearResult(res))
         row <- dbFetch(res)
         if (nrow(row) == 0) stop("Model output for ", paste(template_name, document_name, model_name, sep = "/"), " not generated yet")
-        out <- decode_bytea(row[1,1])
+        out <- readRDS(row[1,1])
         if (is.null(out)) stop("Model output not generated yet, please try again later.")
         return(out)
     }
@@ -392,7 +392,7 @@ encode_bytea <- function (object) {
     tf <- tempfile(fileext = ".rds")
     on.exit(unlink(tf))
 
-    saveRDS(object, file = tf)
+    saveRDS(object, file = tf, compress = FALSE)
     blob::blob(readBin(tf, "raw", n = file.info(tf)$size))
 }
 

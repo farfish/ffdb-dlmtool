@@ -47,7 +47,7 @@ listen_fns <- list(
               FROM document
              WHERE input_hashes IS NULL
         ")
-    }, event = function (conn, payload) {
+    }, event = function (model_dir, conn, payload) {
         # Select from document for update
         row <- fetch_one(conn, "
             SELECT template_name, document_name, version, input_hashes
@@ -66,7 +66,7 @@ listen_fns <- list(
         # Insert missing hashes into model output
         for (m in names(model_inputs)) {
             dbExecute(conn, "
-                INSERT INTO model_output (model_name, input_hash, input_rdata, output_rdata)
+                INSERT INTO model_output (model_name, input_hash, input_rdata, output_path)
                      VALUES ($1, $2, $3, NULL)
                 ON CONFLICT DO NOTHING
             ", params = list(
@@ -89,33 +89,40 @@ listen_fns <- list(
         dbExecute(conn, "
             SELECT pg_notify('model_output', model_name ||'/'|| input_hash)
               FROM model_output
-             WHERE output_rdata IS NULL
+             WHERE output_path IS NULL
         ")
-    }, event = function (conn, payload) {
+    }, event = function (model_dir, conn, payload) {
         row <- fetch_one(conn, "
             SELECT model_name, input_hash, input_rdata
               FROM model_output
              WHERE model_name = $1 AND input_hash = $2
-               AND output_rdata IS NULL
+               AND output_path IS NULL
                FOR UPDATE SKIP LOCKED
         ", params = as.list(strsplit(payload, '/')[[1]]))
         if (identical(row, NA)) return()
 
-        output_rdata <- encode_bytea(tryCatch(callr::r(
+        output_path <- normalizePath(file.path(model_dir, paste(
+            'output',
+            row$model_name,
+            row$input_hash,
+            'rds',
+            sep = ".")), mustWork = FALSE)
+        if (!startsWith(output_path, model_dir)) stop("Attempt to escape model_dir")
+
+        output_obj <- tryCatch(callr::r(
             model_fns[[row$model_name]][['model_output']],
             args = list(decode_bytea(row$input_rdata)),
-            timeout = 240), error = function (e) e))
-
-        # NB: Directly importing bytea is even more inefficient than importing a hex string, so do that
-        output_rdata <- paste(output_rdata[[1]], collapse = "")
+            timeout = 240), error = function (e) e)
+        saveRDS(output_obj, output_path, compress = FALSE)  # NB: Sacrifice disk space for responsiveness (~1.4s to decompress vs ~4.9s)
+        Sys.chmod(output_path, mode = "0644", use_umask = FALSE)  # Make sure anyone can read output
         x <- dbExecute(conn, "
             UPDATE model_output
-               SET output_rdata = DECODE($3, 'hex')
+               SET output_path = $3
              WHERE model_name = $1 AND input_hash = $2
-        ", params = list(row$model_name, row$input_hash, output_rdata))
+        ", params = list(row$model_name, row$input_hash, output_path))
     }))
 
-worker <- function () {
+worker <- function (model_dir) {
     conn <- dbConnect(RPostgres::Postgres(), dbname = 'ffdb_db')
     on.exit(dbDisconnect(conn))
 
@@ -131,7 +138,7 @@ worker <- function () {
             }
         } else {
             log(n$channel, n$payload)
-            dbWithTransaction(conn, listen_fns[[n$channel]][['event']](conn, n$payload))
+            dbWithTransaction(conn, listen_fns[[n$channel]][['event']](model_dir, conn, n$payload))
             log("==================")
         }
     }
