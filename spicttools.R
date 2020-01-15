@@ -1,15 +1,12 @@
 library(spict)
 
 
-ffdbdoc_to_spictstock <- function (doc, seaprod = FALSE, timevaryinggrowth = FALSE) {
-    # Non-null, non-empty string (seaprod/timevaryinggrowth might be missing for old documents)
-    is_truthy <- function (x) nchar(paste0(x[!is.na(x)], collapse = "")) > 0
-
+ffdbdoc_to_spictstock <- function (doc) {
     samplestock<-list(
         seasontype = 1,  # use the spline-based representation of seasonality
         splineorder = 3,
-        seaprod = ifelse(is_truthy(doc$constants[1, 'seaprod']), 3, 0),
-        timevaryinggrowth = is_truthy(doc$constants[1, 'timevaryinggrowth']),
+        seaprod = 0,
+        timevaryinggrowth = FALSE,
         dteuler = 1/16)
 
     # Turn tables into obs/time lists
