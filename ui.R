@@ -11,6 +11,10 @@ ui <- fluidPage(
       includeScript("local-config.js"),
       includeScript("tracking.js")),
   includeHTML("header.html"),
+  a(icon("github", lib = "font-awesome"),
+                   href="https://github.com/farfish/ffdb-dlmtool",
+                   class="navbar-brand",
+                   style="position: absolute; top: 0; right: 0"),
 
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
