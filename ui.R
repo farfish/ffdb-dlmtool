@@ -67,7 +67,12 @@ ui <- fluidPage(
                       ))),
           tabPanel("SPiCt",
               a(id = "download_spict", class = "btn btn-link shiny-download-link", icon("download"), "Download SPiCt data object"),
-              p("For more information on SPiCt, please see the", a("SPiCt guideline document", href = "https://github.com/DTUAqua/spict/blob/master/spict/vignettes/spict_guidelines.pdf")),
+              p(
+                  "For more information on SPiCt, please see the",
+                  a("SPiCt guideline document", href = "https://github.com/DTUAqua/spict/blob/master/spict/vignettes/spict_guidelines.pdf"),
+                  "or the",
+                  a("SPiCt manual", href = "https://github.com/DTUAqua/spict/raw/master/spict/inst/doc/spict_manual.pdf"),
+                  ""),
               tabsetPanel(id = "spict_tabs",
                   tabPanel("SPiCt visualization",
                       withSpinner(plotOutput("spictDataPlot", height = "700px"))
